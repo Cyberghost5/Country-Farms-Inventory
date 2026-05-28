@@ -15,7 +15,16 @@
     <div class="login-shell">
       <div class="lp-left">
         <div class="lp-slider" aria-hidden="true">
-          <div class="lp-slide lp-slide-active" style="background:linear-gradient(135deg,#1a0550 0%,#0d3d2b 100%)"></div>
+          <div class="lp-slide lp-slide-active" style="background-image:url('{{ asset('assets/img/sliders/1.jpg') }}')"></div>
+          <div class="lp-slide" style="background-image:url('{{ asset('assets/img/sliders/2.jpg') }}')"></div>
+          <div class="lp-slide" style="background-image:url('{{ asset('assets/img/sliders/3.jpg') }}')"></div>
+          <div class="lp-slide" style="background-image:url('{{ asset('assets/img/sliders/4.jpg') }}')"></div>
+          <div class="lp-slide" style="background-image:url('{{ asset('assets/img/sliders/5.jpg') }}')"></div>
+          <div class="lp-slide" style="background-image:url('{{ asset('assets/img/sliders/6.jpg') }}')"></div>
+          <div class="lp-slide" style="background-image:url('{{ asset('assets/img/sliders/7.jpg') }}')"></div>
+          <div class="lp-slide" style="background-image:url('{{ asset('assets/img/sliders/8.jpeg') }}')"></div>
+          <div class="lp-slide" style="background-image:url('{{ asset('assets/img/sliders/9.jpeg') }}')"></div>
+          <div class="lp-slide" style="background-image:url('{{ asset('assets/img/sliders/10.jpeg') }}')"></div>
           <div class="lp-slider-overlay"></div>
         </div>
         <div class="lp-brand">

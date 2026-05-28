@@ -17,9 +17,13 @@
       {{-- LEFT PANEL --}}
       <div class="lp-left">
         <div class="lp-slider" aria-hidden="true">
-          <div class="lp-slide lp-slide-active" style="background:linear-gradient(135deg,#1a0550 0%,#0d3d2b 100%)"></div>
-          <div class="lp-slide" style="background:linear-gradient(135deg,#0d3d2b 0%,#1a0550 100%)"></div>
-          <div class="lp-slide" style="background:linear-gradient(135deg,#2a1060 0%,#0a4a30 100%)"></div>
+          @foreach(range(1,7) as $i)
+          <div class="lp-slide {{ $i === 1 ? 'lp-slide-active' : '' }}"
+               style="background-image:url('{{ asset('assets/img/sliders/'.$i.'.jpg') }}')"></div>
+          @endforeach
+          <div class="lp-slide" style="background-image:url('{{ asset('assets/img/sliders/8.jpeg') }}')"></div>
+          <div class="lp-slide" style="background-image:url('{{ asset('assets/img/sliders/9.jpeg') }}')"></div>
+          <div class="lp-slide" style="background-image:url('{{ asset('assets/img/sliders/10.jpeg') }}')"></div>
           <div class="lp-slider-overlay"></div>
         </div>
 
