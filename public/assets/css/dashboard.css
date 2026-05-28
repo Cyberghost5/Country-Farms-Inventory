@@ -756,6 +756,13 @@ a.stat-card {
   line-height: 1;
 }
 
+/* If mobile view, remove the font size */
+@media (max-width: 768px) {
+  .stat-value {
+    font-size: 1rem;
+  }
+}
+
 .stat-unit {
   margin: 2px 0 0;
   color: var(--text-muted);
