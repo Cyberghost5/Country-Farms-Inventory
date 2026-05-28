@@ -60,7 +60,7 @@
   <div class="form-group">
     <label>Base Price (₦) *</label>
     <input class="form-input" type="number" name="base_price"
-           value="{{ old('base_price', $product?->base_price ?? 0) }}"
+           value="{{ old('base_price', $product?->base_price) }}"
            step="0.01" min="0" required />
   </div>
   @if ($product)
