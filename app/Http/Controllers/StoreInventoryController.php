@@ -30,7 +30,11 @@ class StoreInventoryController extends Controller
             ->paginate(25);
 
         // Aggregate stats
-        $totalStock = ProductionBatch::verified()->sum('quantity');
+        $produced = ProductionBatch::verified()->sum('quantity');
+        $dispatched = \App\Models\DispatchItem::whereHas('dispatch', function($q) {
+            $q->whereIn('status', ['dispatched', 'received']);
+        })->sum('quantity');
+        $totalStock = max(0, $produced - $dispatched);
         $pendingCount = $pendingBatches->count();
 
         $stats = [

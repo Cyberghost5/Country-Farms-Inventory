@@ -47,7 +47,11 @@ class OversightInventoryController extends Controller
             ->get();
 
         // Calculate card statistics
-        $totalVerifiedStock = ProductionBatch::verified()->sum('quantity');
+        $produced = ProductionBatch::verified()->sum('quantity');
+        $dispatched = \App\Models\DispatchItem::whereHas('dispatch', function($q) {
+            $q->whereIn('status', ['dispatched', 'received']);
+        })->sum('quantity');
+        $totalVerifiedStock = max(0, $produced - $dispatched);
         $totalPendingBatches = ProductionBatch::pending()->count();
         $totalVerifiedBatches = ProductionBatch::verified()->count();
 
