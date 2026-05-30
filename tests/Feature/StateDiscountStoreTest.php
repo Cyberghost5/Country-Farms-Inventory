@@ -4,11 +4,11 @@ namespace Tests\Feature;
 
 use App\Models\Product;
 use App\Models\User;
-use App\Models\DistributorDiscount;
+use App\Models\StateDiscount;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class DistributorDiscountStoreTest extends TestCase
+class StateDiscountStoreTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -29,6 +29,7 @@ class DistributorDiscountStoreTest extends TestCase
         $this->distributor = User::factory()->create([
             'role' => User::ROLE_DISTRIBUTOR,
             'is_active' => true,
+            'state' => 'Lagos',
         ]);
 
         $this->product1 = Product::create([
@@ -61,7 +62,7 @@ class DistributorDiscountStoreTest extends TestCase
     {
         $response = $this->actingAs($this->superAdmin)
             ->post(route('admin.pricing.storeDiscount'), [
-                'distributor_id' => $this->distributor->id,
+                'state' => 'Lagos',
                 'type' => 'percentage',
                 'value' => 10.00,
                 'applies_to' => 'all',
@@ -70,8 +71,8 @@ class DistributorDiscountStoreTest extends TestCase
         $response->assertStatus(302);
         $response->assertSessionHas('success');
 
-        $this->assertDatabaseHas('distributor_discounts', [
-            'distributor_id' => $this->distributor->id,
+        $this->assertDatabaseHas('state_discounts', [
+            'state' => 'Lagos',
             'type' => 'percentage',
             'value' => 10.00,
             'applies_to' => 'all',
@@ -84,7 +85,7 @@ class DistributorDiscountStoreTest extends TestCase
     {
         $response = $this->actingAs($this->superAdmin)
             ->post(route('admin.pricing.storeDiscount'), [
-                'distributor_id' => $this->distributor->id,
+                'state' => 'Lagos',
                 'type' => 'percentage',
                 'value' => 15.00,
                 'applies_to' => 'category',
@@ -94,16 +95,16 @@ class DistributorDiscountStoreTest extends TestCase
         $response->assertStatus(302);
         $response->assertSessionHas('success');
 
-        $this->assertDatabaseHas('distributor_discounts', [
-            'distributor_id' => $this->distributor->id,
+        $this->assertDatabaseHas('state_discounts', [
+            'state' => 'Lagos',
             'type' => 'percentage',
             'value' => 15.00,
             'applies_to' => 'category',
             'applies_value' => 'yoghurt',
         ]);
 
-        $this->assertDatabaseHas('distributor_discounts', [
-            'distributor_id' => $this->distributor->id,
+        $this->assertDatabaseHas('state_discounts', [
+            'state' => 'Lagos',
             'type' => 'percentage',
             'value' => 15.00,
             'applies_to' => 'category',
@@ -116,7 +117,7 @@ class DistributorDiscountStoreTest extends TestCase
     {
         $response = $this->actingAs($this->superAdmin)
             ->post(route('admin.pricing.storeDiscount'), [
-                'distributor_id' => $this->distributor->id,
+                'state' => 'Lagos',
                 'type' => 'fixed',
                 'value' => 50.00,
                 'applies_to' => 'product',
@@ -126,16 +127,16 @@ class DistributorDiscountStoreTest extends TestCase
         $response->assertStatus(302);
         $response->assertSessionHas('success');
 
-        $this->assertDatabaseHas('distributor_discounts', [
-            'distributor_id' => $this->distributor->id,
+        $this->assertDatabaseHas('state_discounts', [
+            'state' => 'Lagos',
             'type' => 'fixed',
             'value' => 50.00,
             'applies_to' => 'product',
             'applies_value' => $this->product1->id,
         ]);
 
-        $this->assertDatabaseHas('distributor_discounts', [
-            'distributor_id' => $this->distributor->id,
+        $this->assertDatabaseHas('state_discounts', [
+            'state' => 'Lagos',
             'type' => 'fixed',
             'value' => 50.00,
             'applies_to' => 'product',
@@ -147,8 +148,8 @@ class DistributorDiscountStoreTest extends TestCase
     public function test_discounts_page_resolves_product_names()
     {
         // 1. Create a product discount
-        DistributorDiscount::create([
-            'distributor_id' => $this->distributor->id,
+        StateDiscount::create([
+            'state' => 'Lagos',
             'type' => 'percentage',
             'value' => 20.00,
             'applies_to' => 'product',

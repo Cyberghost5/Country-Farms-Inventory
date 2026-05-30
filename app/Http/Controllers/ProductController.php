@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DistributorDiscount;
+use App\Models\StateDiscount;
 use App\Models\DistributorPricing;
 use App\Models\Product;
 use App\Models\User;
@@ -132,7 +132,7 @@ class ProductController extends Controller
 
         $products    = Product::where('is_active', true)->orderBy('category')->orderBy('name')->get();
         $pricing     = DistributorPricing::where('distributor_id', $selected?->id)->pluck('price', 'product_id');
-        $discounts   = DistributorDiscount::with('product')->where('distributor_id', $selected?->id)->where('is_active', true)->get();
+        $discounts   = StateDiscount::with('product')->where('is_active', true)->orderBy('state')->get();
 
         return view('products.pricing', compact('user', 'distributors', 'selected', 'products', 'pricing', 'discounts'));
     }
@@ -170,15 +170,15 @@ class ProductController extends Controller
         abort_unless(Auth::user()->isSuperAdmin(), 403);
 
         $request->validate([
-            'distributor_id' => ['required', 'exists:users,id'],
-            'type'           => ['required', 'in:percentage,fixed'],
-            'value'          => ['required', 'numeric', 'min:0'],
-            'applies_to'     => ['required', 'in:all,category,product'],
-            'notes'          => ['nullable', 'string'],
+            'state'      => ['required', 'string'],
+            'type'       => ['required', 'in:percentage,fixed'],
+            'value'      => ['required', 'numeric', 'min:0'],
+            'applies_to' => ['required', 'in:all,category,product'],
+            'notes'      => ['nullable', 'string'],
         ]);
 
         $appliesTo = $request->input('applies_to');
-        $distributorId = $request->input('distributor_id');
+        $state = $request->input('state');
         $type = $request->input('type');
         $value = $request->input('value');
         $notes = $request->input('notes');
@@ -201,8 +201,8 @@ class ProductController extends Controller
         }
 
         foreach ($values as $val) {
-            DistributorDiscount::create([
-                'distributor_id' => $distributorId,
+            StateDiscount::create([
+                'state'          => $state,
                 'type'           => $type,
                 'value'          => $value,
                 'applies_to'     => $appliesTo,
@@ -216,7 +216,7 @@ class ProductController extends Controller
         return back()->with('success', 'Discount rule(s) added successfully.');
     }
 
-    public function destroyDiscount(DistributorDiscount $discount)
+    public function destroyDiscount(StateDiscount $discount)
     {
         abort_unless(Auth::user()->isSuperAdmin(), 403);
         $discount->delete();

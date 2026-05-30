@@ -64,6 +64,7 @@ class UserManagementController extends Controller
             'role'         => ['required', Rule::in(['general_manager', 'production_manager', 'store_manager', 'distributor'])],
             'company_name' => ['nullable', 'string', 'max:150'],
             'state'        => ['nullable', 'string', 'max:60'],
+            'lga'          => ['nullable', 'string', 'max:60'],
             'address'      => ['nullable', 'string'],
             'password'     => ['required', 'string', 'min:8', 'confirmed'],
         ]);
@@ -99,6 +100,7 @@ class UserManagementController extends Controller
             'phone'        => ['required', 'string', Rule::unique('users', 'phone')->ignore($user->id)],
             'company_name' => ['nullable', 'string', 'max:150'],
             'state'        => ['nullable', 'string', 'max:60'],
+            'lga'          => ['nullable', 'string', 'max:60'],
             'address'      => ['nullable', 'string'],
             'is_active'    => ['nullable', 'boolean'],
             'password'     => ['nullable', 'string', 'min:8', 'confirmed'],

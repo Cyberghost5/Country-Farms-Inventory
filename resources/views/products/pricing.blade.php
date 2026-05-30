@@ -93,7 +93,7 @@
             <select name="distributor_id" class="filter-select" onchange="this.form.submit()" style="min-width:220px;">
               @foreach ($distributors as $dist)
                 <option value="{{ $dist->id }}" {{ $selected?->id === $dist->id ? 'selected' : '' }}>
-                  {{ $dist->name }} {{ $dist->company_name ? '— '.$dist->company_name : '' }}
+                  {{ $dist->name }} {{ $dist->company_name ? '- '.$dist->company_name : '' }}
                 </option>
               @endforeach
             </select>
@@ -158,8 +158,8 @@
           <section class="card" style="padding:0 0 24px;">
             <div class="section-head" style="padding:18px 24px 12px;border-bottom:1px solid #f0ebe0;display:flex;align-items:center;justify-content:space-between;">
               <div>
-                <h3 style="font-size:1rem;color:#1d086c;font-weight:600;"><i class="bi bi-percent"></i> Discounts for {{ $selected->name }}</h3>
-                <p style="color:#888;font-size:.85rem;margin-top:4px;">Active discount rules applied at order time.</p>
+                <h3 style="font-size:1rem;color:#1d086c;font-weight:600;"><i class="bi bi-percent"></i> State-wide Discounts</h3>
+                <p style="color:#888;font-size:.85rem;margin-top:4px;">Active state-wide discount rules applied at order/dispatch time.</p>
               </div>
               <button class="primary-btn" id="openDiscountModal">
                 <i class="bi bi-plus-lg"></i> Add Discount
@@ -167,12 +167,13 @@
             </div>
 
             @if ($discounts->isEmpty())
-              <p style="padding:20px 24px;color:#999;font-size:.9rem;">No discount rules set for this distributor.</p>
+              <p style="padding:20px 24px;color:#999;font-size:.9rem;">No state-wide discount rules set.</p>
             @else
               <div class="table-scroll">
                 <table class="inv-table">
                   <thead>
                     <tr>
+                      <th>State</th>
                       <th>Type</th>
                       <th>Applies To</th>
                       <th>Description</th>
@@ -183,12 +184,13 @@
                   <tbody>
                     @foreach ($discounts as $disc)
                       <tr>
+                        <td><strong>{{ $disc->state }}</strong></td>
                         <td>{{ ucfirst($disc->type) }}</td>
                         <td>
                           {{ ucfirst($disc->applies_to) }}@if ($disc->applies_value): {{ $disc->applies_to === 'product' && $disc->product ? $disc->product->name : ucfirst($disc->applies_value) }}@endif
                         </td>
                         <td>{{ $disc->label }}</td>
-                        <td>{{ $disc->notes ?: '—' }}</td>
+                        <td>{{ $disc->notes ?: '-' }}</td>
                         <td>
                           <form method="POST" action="{{ route('admin.pricing.destroyDiscount', $disc) }}"
                                 onsubmit="return confirm('Remove this discount?')">
@@ -222,10 +224,15 @@
         </div>
         <form method="POST" action="{{ route('admin.pricing.storeDiscount') }}" class="inv-modal-form">
           @csrf
-          <input type="hidden" name="distributor_id" value="{{ $selected?->id }}" />
 
           <div class="inv-modal-body">
             <div class="form-row-2">
+              <div class="form-group">
+                <label>State *</label>
+                <select class="form-input" name="state" id="stateSelect" required>
+                  <option value="">-- Select State --</option>
+                </select>
+              </div>
               <div class="form-group">
                 <label>Discount Type *</label>
                 <select class="form-input" name="type" required id="discountTypeSelect">
@@ -233,14 +240,14 @@
                   <option value="fixed">Fixed Amount (₦)</option>
                 </select>
               </div>
+            </div>
+
+            <div class="form-row-2">
               <div class="form-group">
                 <label>Value *</label>
                 <input class="form-input" type="number" name="value" step="0.01" min="0" required
                        placeholder="e.g. 10 for 10%" />
               </div>
-            </div>
-
-            <div class="form-row-2">
               <div class="form-group">
                 <label>Applies To *</label>
                 <select class="form-input" name="applies_to" required id="appliesToSelect">
@@ -249,7 +256,10 @@
                   <option value="product">Specific Product</option>
                 </select>
               </div>
-              <div class="form-group" id="categoriesWrap" style="display:none;">
+            </div>
+
+            <div class="form-row-2" style="margin-top: 15px;">
+              <div class="form-group" id="categoriesWrap" style="display:none; width: 100%;">
                 <label>Select Category/Categories *</label>
                 <select class="form-input" name="applies_value_categories[]" id="categoriesSelect" multiple>
                   @foreach (\App\Models\Product::CATEGORIES as $cat)
@@ -258,7 +268,7 @@
                 </select>
                 <small style="color: #888; font-size: 0.72rem; display: block; margin-top: 4px;">Search and select one or more categories.</small>
               </div>
-              <div class="form-group" id="productsWrap" style="display:none;">
+              <div class="form-group" id="productsWrap" style="display:none; width: 100%;">
                 <label>Select Product(s) *</label>
                 <select class="form-input" name="applies_value_products[]" id="productsSelect" multiple>
                   @foreach ($products as $prod)
@@ -351,6 +361,29 @@
             }
           }
         });
+      });
+    </script>
+    <script src="{{ asset('assets/js/states-lgas.js') }}"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const stateSelect = document.getElementById('stateSelect');
+        const selectedDistributorState = "{{ $selected?->state }}";
+
+        if (window.statesAndLgas && stateSelect) {
+          // Populate states
+          for (const state in window.statesAndLgas) {
+            if (window.statesAndLgas.hasOwnProperty(state)) {
+              if (state === 'FCT') continue; // Skip redundant alias key in list
+              const opt = document.createElement('option');
+              opt.value = state;
+              opt.textContent = state;
+              if (state === selectedDistributorState) {
+                opt.selected = true;
+              }
+              stateSelect.appendChild(opt);
+            }
+          }
+        }
       });
     </script>
     <script src="{{ asset('assets/js/dashboard.js') }}"></script>

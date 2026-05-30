@@ -21,7 +21,7 @@
         <header class="topbar">
           <div class="title-block">
             <h2>Inventory Oversight</h2>
-            <p>Oversight panel — monitor system-wide stock levels and batch history.</p>
+            <p>Oversight panel - monitor system-wide stock levels and batch history.</p>
           </div>
         </header>
 
@@ -70,7 +70,7 @@
                     <td><span class="inv-name">{{ $product->name }}</span></td>
                     <td><code class="sku-code">{{ $product->sku }}</code></td>
                     <td><span class="cat-pill cat-{{ $product->category }}">{{ ucfirst($product->category) }}</span></td>
-                    <td>{{ $product->packaging_type ?: '—' }} &middot; {{ $product->size_volume ?: '—' }}</td>
+                    <td>{{ $product->packaging_type ?: '-' }} &middot; {{ $product->size_volume ?: '-' }}</td>
                     <td>{{ ucfirst($product->unit) }}</td>
                     <td>
                       @if ($stock > 0)
@@ -213,9 +213,9 @@
               </div>
 
               <div style="background:#f8f9fa; padding:12px; border-radius:6px; border:1px solid #e9ecef; margin-bottom:16px; font-size:0.9rem; line-height:1.5;">
-                <div><strong>Batch Number:</strong> <span id="delBatchNum">—</span></div>
-                <div><strong>Product:</strong> <span id="delBatchProd">—</span></div>
-                <div><strong>Quantity:</strong> <span id="delBatchQty">—</span></div>
+                <div><strong>Batch Number:</strong> <span id="delBatchNum">-</span></div>
+                <div><strong>Product:</strong> <span id="delBatchProd">-</span></div>
+                <div><strong>Quantity:</strong> <span id="delBatchQty">-</span></div>
               </div>
 
               <div class="form-group" style="text-align: center; margin-bottom: 20px;">

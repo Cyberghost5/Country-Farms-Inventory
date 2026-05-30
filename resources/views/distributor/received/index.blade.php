@@ -21,7 +21,7 @@
         <header class="topbar">
           <div class="title-block">
             <h2>Received Products</h2>
-            <p>Distributor panel — view goods dispatched to your company and confirm receipt.</p>
+            <p>Distributor panel - view goods dispatched to your company and confirm receipt.</p>
           </div>
         </header>
 

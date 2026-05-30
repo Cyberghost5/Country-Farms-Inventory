@@ -21,7 +21,7 @@
         <header class="topbar">
           <div class="title-block">
             <h2>Distributors Financials</h2>
-            <p>Oversight panel — monitor distributor sales, balances, and record payments.</p>
+            <p>Oversight panel - monitor distributor sales, balances, and record payments.</p>
           </div>
           @if ($user->isSuperAdmin() && $unpaidInvoices->isNotEmpty())
             <div class="top-actions">
@@ -90,7 +90,7 @@
                               <i class="bi bi-file-earmark-arrow-down"></i> View Proof
                             </a>
                           @else
-                            —
+                            -
                           @endif
                         </td>
                         <td>
@@ -147,8 +147,8 @@
                       <small style="color:#666; display:block;">{{ $d->phone }} &middot; {{ $d->email ?: 'No Email' }}</small>
                     </td>
                     <td>
-                      <span style="font-weight:600; color:#1d086c;">{{ $d->company_name ?: '—' }}</span>
-                      <small style="color:#666; display:block;">{{ $d->state ?: 'No State' }} &middot; {{ $d->address ?: 'No Address' }}</small>
+                      <span style="font-weight:600; color:#1d086c;">{{ $d->company_name ?: '-' }}</span>
+                      <small style="color:#666; display:block;">{{ $d->state ? $d->state . ($d->lga ? ' (' . $d->lga . ')' : '') : 'No State/LGA' }} &middot; {{ $d->address ?: 'No Address' }}</small>
                     </td>
                     <td>{{ number_format($totalInvoiced, 2) }}</td>
                     <td>{{ number_format($totalPaid, 2) }}</td>

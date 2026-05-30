@@ -25,7 +25,7 @@
 <p class="menu-label">Main Menu</p>
 <nav class="nav-links">
 
-  {{-- Dashboard — all roles --}}
+  {{-- Dashboard - all roles --}}
   <a href="{{ route('dashboard') }}"
      class="nav-link nav-link-anchor {{ request()->routeIs('dashboard') ? 'active' : '' }}">
     <i class="bi bi-grid-1x2 nav-icon"></i>Dashboard
@@ -41,6 +41,11 @@
     <a href="{{ route('admin.dispatches.index') }}"
        class="nav-link nav-link-anchor {{ request()->routeIs('admin.dispatches.*') ? 'active' : '' }}">
       <i class="bi bi-truck nav-icon"></i>Dispatches
+    </a>
+
+    <a href="{{ route('orders.index') }}"
+       class="nav-link nav-link-anchor {{ request()->routeIs('orders.*') ? 'active' : '' }}">
+      <i class="bi bi-cart nav-icon"></i>Orders
     </a>
 
     <a href="{{ route('admin.distributors.index') }}"
@@ -87,6 +92,11 @@
       <i class="bi bi-clipboard-plus nav-icon"></i>Upload Inventory
     </a>
 
+    <a href="{{ route('orders.index') }}"
+       class="nav-link nav-link-anchor {{ request()->routeIs('orders.*') ? 'active' : '' }}">
+      <i class="bi bi-cart nav-icon"></i>Orders
+    </a>
+
     <a href="{{ route('production.products.index') }}"
        class="nav-link nav-link-anchor {{ request()->routeIs('production.products.*') ? 'active' : '' }}">
       <i class="bi bi-box-seam nav-icon"></i>Products
@@ -104,6 +114,11 @@
        class="nav-link nav-link-anchor {{ request()->routeIs('store.dispatches.*') ? 'active' : '' }}">
       <i class="bi bi-truck nav-icon"></i>Dispatches
     </a>
+
+    <a href="{{ route('orders.index') }}"
+       class="nav-link nav-link-anchor {{ request()->routeIs('orders.*') ? 'active' : '' }}">
+      <i class="bi bi-cart nav-icon"></i>Orders
+    </a>
   @endif
 
   {{-- Distributor --}}
@@ -111,6 +126,11 @@
     <a href="{{ route('distributor.received.index') }}"
        class="nav-link nav-link-anchor {{ request()->routeIs('distributor.received.*') ? 'active' : '' }}">
       <i class="bi bi-box-arrow-in-down nav-icon"></i>Received Products
+    </a>
+
+    <a href="{{ route('orders.index') }}"
+       class="nav-link nav-link-anchor {{ request()->routeIs('orders.*') ? 'active' : '' }}">
+      <i class="bi bi-cart nav-icon"></i>My Orders
     </a>
 
     <a href="{{ route('distributor.invoices.index') }}"
@@ -124,7 +144,7 @@
     </a>
   @endif
 
-  {{-- Notifications — all roles --}}
+  {{-- Notifications - all roles --}}
   <a href="{{ route('notifications.index') }}"
      class="nav-link nav-link-anchor {{ request()->routeIs('notifications.*') ? 'active' : '' }}">
     <i class="bi bi-bell nav-icon"></i>Notifications

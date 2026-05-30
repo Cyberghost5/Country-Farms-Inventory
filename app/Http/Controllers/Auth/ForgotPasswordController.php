@@ -42,7 +42,7 @@ class ForgotPasswordController extends Controller
         // TODO Milestone 4+: send via SMS service
         // For now, flash OTP in dev mode
         if (config('app.debug')) {
-            session()->flash('dev_otp', "DEV MODE — OTP: {$otp}");
+            session()->flash('dev_otp', "DEV MODE - OTP: {$otp}");
         }
 
         $request->session()->put('otp_phone', $storedPhone);

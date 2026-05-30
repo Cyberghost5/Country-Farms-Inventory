@@ -21,7 +21,7 @@
         <header class="topbar">
           <div class="title-block">
             <h2>Inventory Management</h2>
-            <p>Store Manager panel — verify production batches and track product stock.</p>
+            <p>Store Manager panel - verify production batches and track product stock.</p>
           </div>
         </header>
 
@@ -87,7 +87,7 @@
                       @if ($batch->remarks)
                         <span class="inv-notes" title="{{ $batch->remarks }}">{{ Str::limit($batch->remarks, 30) }}</span>
                       @else
-                        <span style="color:#aaa;">—</span>
+                        <span style="color:#aaa;">-</span>
                       @endif
                     </td>
                     <td>
@@ -139,7 +139,7 @@
                     <td><span class="inv-name">{{ $product->name }}</span></td>
                     <td><code class="sku-code">{{ $product->sku }}</code></td>
                     <td><span class="cat-pill cat-{{ $product->category }}">{{ ucfirst($product->category) }}</span></td>
-                    <td>{{ $product->packaging_type ?: '—' }} &middot; {{ $product->size_volume ?: '—' }}</td>
+                    <td>{{ $product->packaging_type ?: '-' }} &middot; {{ $product->size_volume ?: '-' }}</td>
                     <td>{{ ucfirst($product->unit) }}</td>
                     <td>
                       @if ($stock > 0)

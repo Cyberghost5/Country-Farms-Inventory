@@ -22,7 +22,7 @@
         <header class="topbar">
           <div class="title-block">
             <h2>Products</h2>
-            <p>Master product list — all goods manufactured by Country Yoghurt.</p>
+            <p>Master product list - all goods manufactured by Country Yoghurt.</p>
           </div>
           <div class="top-actions">
             <button class="primary-btn" id="openAddModal">
@@ -112,8 +112,8 @@
                     </td>
                     <td><code class="sku-code">{{ $product->sku }}</code></td>
                     <td><span class="cat-pill cat-{{ $product->category }}">{{ ucfirst($product->category) }}</span></td>
-                    <td>{{ $product->size_volume ?: '—' }}</td>
-                    <td>{{ $product->packaging_type ?: '—' }}</td>
+                    <td>{{ $product->size_volume ?: '-' }}</td>
+                    <td>{{ $product->packaging_type ?: '-' }}</td>
                     <td>{{ ucfirst($product->unit) }}</td>
                     <td>{{ number_format($product->base_price, 2) }}</td>
                     <td>

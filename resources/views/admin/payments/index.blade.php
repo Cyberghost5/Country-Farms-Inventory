@@ -21,7 +21,7 @@
         <header class="topbar">
           <div class="title-block">
             <h2>Payments Log</h2>
-            <p>Oversight panel — view all payments, filter by distributor or status, and approve/reject pending uploads.</p>
+            <p>Oversight panel - view all payments, filter by distributor or status, and approve/reject pending uploads.</p>
           </div>
         </header>
 
@@ -100,7 +100,7 @@
                           <i class="bi bi-file-earmark-arrow-down"></i> View Proof
                         </a>
                       @else
-                        —
+                        -
                       @endif
                     </td>
                     <td>
@@ -141,7 +141,7 @@
                             </form>
                           </div>
                         @else
-                          <span style="color:#aaa;">—</span>
+                          <span style="color:#aaa;">-</span>
                         @endif
                       </td>
                     @endif

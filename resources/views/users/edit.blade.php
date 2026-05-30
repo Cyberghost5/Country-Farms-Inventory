@@ -20,7 +20,7 @@
       <main class="main-content">
         <header class="topbar">
           <div class="title-block">
-            <h2>Edit — {{ $user->name }}</h2>
+            <h2>Edit - {{ $user->name }}</h2>
             <p>{{ $user->role_label }}</p>
           </div>
           <div class="top-actions">
@@ -78,8 +78,21 @@
               </div>
               <div class="form-group">
                 <label>State</label>
-                <input class="form-input" type="text" name="state"
-                       value="{{ old('state', $user->state) }}" />
+                <select class="form-input" name="state" id="stateSelect">
+                  <option value="">-- Select State --</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label>LGA (Local Government Area)</label>
+                <select class="form-input" name="lga" id="lgaSelect">
+                  <option value="">-- Select LGA --</option>
+                </select>
+              </div>
+              <div class="form-group">
+                {{-- Spacer --}}
               </div>
             </div>
 
@@ -130,6 +143,7 @@
       </main>
     </div>
 
+    <script src="{{ asset('assets/js/states-lgas.js') }}"></script>
     <script>
       function togglePw(fieldId, eyeId) {
         const f = document.getElementById(fieldId);
@@ -137,6 +151,52 @@
         if (f.type === 'password') { f.type = 'text'; e.className = 'bi bi-eye-slash'; }
         else { f.type = 'password'; e.className = 'bi bi-eye'; }
       }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        const stateSelect = document.getElementById('stateSelect');
+        const lgaSelect = document.getElementById('lgaSelect');
+        const oldState = "{{ old('state', $user->state) }}";
+        const oldLga = "{{ old('lga', $user->lga) }}";
+
+        if (window.statesAndLgas) {
+          // Populate states
+          for (const state in window.statesAndLgas) {
+            if (window.statesAndLgas.hasOwnProperty(state)) {
+              if (state === 'FCT') continue; // Skip redundant alias key in list
+              const opt = document.createElement('option');
+              opt.value = state;
+              opt.textContent = state;
+              if (state === oldState) {
+                opt.selected = true;
+              }
+              stateSelect.appendChild(opt);
+            }
+          }
+
+          function populateLgas(selectedState, selectedLga = '') {
+            lgaSelect.innerHTML = '<option value="">-- Select LGA --</option>';
+            if (!selectedState || !window.statesAndLgas[selectedState]) return;
+
+            window.statesAndLgas[selectedState].forEach(function (lga) {
+              const opt = document.createElement('option');
+              opt.value = lga;
+              opt.textContent = lga;
+              if (lga === selectedLga) {
+                opt.selected = true;
+              }
+              lgaSelect.appendChild(opt);
+            });
+          }
+
+          stateSelect.addEventListener('change', function () {
+            populateLgas(this.value);
+          });
+
+          if (oldState) {
+            populateLgas(oldState, oldLga);
+          }
+        }
+      });
     </script>
     <script src="{{ asset('assets/js/dashboard.js') }}"></script>
   </body>

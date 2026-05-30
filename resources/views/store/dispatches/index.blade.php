@@ -21,7 +21,7 @@
         <header class="topbar">
           <div class="title-block">
             <h2>Dispatches Log</h2>
-            <p>Store Manager panel — track and record dispatches to distributors.</p>
+            <p>Store Manager panel - track and record dispatches to distributors.</p>
           </div>
           <div class="top-actions">
             <a href="{{ route('store.dispatches.create') }}" class="primary-btn" style="text-decoration:none;">
@@ -102,7 +102,7 @@
                       @if ($d->remarks)
                         <span class="inv-notes" title="{{ $d->remarks }}">{{ Str::limit($d->remarks, 30) }}</span>
                       @else
-                        <span style="color:#aaa;">—</span>
+                        <span style="color:#aaa;">-</span>
                       @endif
                     </td>
                   </tr>

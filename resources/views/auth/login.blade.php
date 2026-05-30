@@ -46,7 +46,7 @@
           <h2>Produce. Verify.<br><span>Distribute.</span></h2>
           <p>
             End-to-end manufacturing and distribution control<br>
-            for Country Yoghurt — from production floor<br>
+            for Country Yoghurt - from production floor<br>
             to distributor doorstep.
           </p>
         </div>

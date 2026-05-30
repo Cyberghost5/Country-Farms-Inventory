@@ -93,4 +93,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/distributor/invoices', [DistributorController::class, 'invoicesIndex'])->name('distributor.invoices.index');
     Route::get('/distributor/payments', [DistributorController::class, 'paymentsIndex'])->name('distributor.payments.index');
     Route::post('/distributor/payments/upload', [DistributorController::class, 'uploadPayment'])->name('distributor.payments.upload');
+
+    /* ── Order Management routes ── */
+    Route::get('/orders', [\App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/create', [\App\Http\Controllers\OrderController::class, 'create'])->name('orders.create');
+    Route::post('/orders', [\App\Http\Controllers\OrderController::class, 'store'])->name('orders.store');
+    Route::get('/orders/{order}', [\App\Http\Controllers\OrderController::class, 'show'])->name('orders.show');
+    Route::post('/orders/{order}/approve', [\App\Http\Controllers\OrderController::class, 'approve'])->name('orders.approve');
+    Route::post('/orders/{order}/reject', [\App\Http\Controllers\OrderController::class, 'reject'])->name('orders.reject');
 });

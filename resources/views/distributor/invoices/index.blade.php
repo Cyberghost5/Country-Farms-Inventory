@@ -21,7 +21,7 @@
         <header class="topbar">
           <div class="title-block">
             <h2>Invoices</h2>
-            <p>Distributor panel — view invoices and outstanding financial balances.</p>
+            <p>Distributor panel - view invoices and outstanding financial balances.</p>
           </div>
         </header>
 
@@ -85,7 +85,7 @@
                 @forelse ($invoices as $inv)
                   <tr>
                     <td><strong style="color:#1d086c;">{{ $inv->invoice_number }}</strong></td>
-                    <td><code>{{ $inv->dispatch ? $inv->dispatch->dispatch_number : '—' }}</code></td>
+                    <td><code>{{ $inv->dispatch ? $inv->dispatch->dispatch_number : '-' }}</code></td>
                     <td>{{ $inv->created_at->format('d M Y') }}</td>
                     <td>
                       <span class="{{ now()->greaterThan($inv->due_date) && $inv->status !== 'paid' ? 'stock-badge-low' : '' }}">
@@ -125,7 +125,7 @@
                           </div>
                         </details>
                       @else
-                        <span style="color:#aaa;">—</span>
+                        <span style="color:#aaa;">-</span>
                       @endif
                     </td>
                     <td>
@@ -138,7 +138,7 @@
                           <i class="bi bi-cloud-arrow-up"></i> Pay
                         </button>
                       @else
-                        <span style="color:#aaa;">—</span>
+                        <span style="color:#aaa;">-</span>
                       @endif
                     </td>
                   </tr>

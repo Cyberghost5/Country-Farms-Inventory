@@ -21,7 +21,7 @@
         <header class="topbar">
           <div class="title-block">
             <h2>Dispatches Oversight</h2>
-            <p>Oversight panel — track product dispatch logs and delivery status across all distributors.</p>
+            <p>Oversight panel - track product dispatch logs and delivery status across all distributors.</p>
           </div>
         </header>
 

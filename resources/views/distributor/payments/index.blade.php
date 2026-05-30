@@ -21,7 +21,7 @@
         <header class="topbar">
           <div class="title-block">
             <h2>Payment History</h2>
-            <p>Distributor panel — view payments made against your invoices.</p>
+            <p>Distributor panel - view payments made against your invoices.</p>
           </div>
         </header>
 
@@ -55,7 +55,7 @@
                           <i class="bi bi-file-earmark-arrow-down"></i> View Proof
                         </a>
                       @else
-                        —
+                        -
                       @endif
                     </td>
                     <td>

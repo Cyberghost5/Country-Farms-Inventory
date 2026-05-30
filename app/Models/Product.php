@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use App\Models\DistributorDiscount;
+use App\Models\StateDiscount;
 
 #[Fillable(['name', 'sku', 'category', 'size_volume', 'packaging_type', 'unit', 'base_price', 'description', 'is_active', 'created_by'])]
 class Product extends Model
@@ -78,7 +78,12 @@ class Product extends Model
     {
         $price = $this->priceForDistributor($distributorId);
 
-        $discounts = DistributorDiscount::where('distributor_id', $distributorId)
+        $distributor = User::find($distributorId);
+        if (!$distributor || !$distributor->state) {
+            return max(0.0, (float) $price);
+        }
+
+        $discounts = StateDiscount::where('state', $distributor->state)
             ->where('is_active', true)
             ->get();
 

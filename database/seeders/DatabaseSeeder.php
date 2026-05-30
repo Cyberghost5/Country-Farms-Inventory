@@ -77,6 +77,7 @@ class DatabaseSeeder extends Seeder
                 'role'         => 'distributor',
                 'company_name' => 'Demo Distribution Ltd',
                 'state'        => 'Lagos',
+                'lga'          => 'Ikeja',
                 'password'     => bcrypt('password'),
                 'is_active'    => true,
             ]

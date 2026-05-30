@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\DistributorDiscount;
+use App\Models\StateDiscount;
 use App\Models\DistributorPricing;
 use App\Models\Invoice;
 use App\Models\Payment;
@@ -39,6 +39,7 @@ class DispatchDistributionTest extends TestCase
             'role' => User::ROLE_DISTRIBUTOR,
             'is_active' => true,
             'company_name' => 'Mega Dist Co.',
+            'state' => 'Lagos',
         ]);
 
         $this->superAdmin = User::factory()->create([
@@ -88,8 +89,8 @@ class DispatchDistributionTest extends TestCase
         $this->assertEquals(900.00, $this->yoghurt->calculatedPriceForDistributor($this->distributor->id));
 
         // 3. Add 10% discount on yoghurt category
-        DistributorDiscount::create([
-            'distributor_id' => $this->distributor->id,
+        StateDiscount::create([
+            'state' => 'Lagos',
             'type' => 'percentage',
             'value' => 10.00,
             'applies_to' => 'category',
@@ -101,8 +102,8 @@ class DispatchDistributionTest extends TestCase
         $this->assertEquals(810.00, $this->yoghurt->calculatedPriceForDistributor($this->distributor->id));
 
         // 4. Add fixed discount of 10.00 on all products
-        DistributorDiscount::create([
-            'distributor_id' => $this->distributor->id,
+        StateDiscount::create([
+            'state' => 'Lagos',
             'type' => 'fixed',
             'value' => 10.00,
             'applies_to' => 'all',

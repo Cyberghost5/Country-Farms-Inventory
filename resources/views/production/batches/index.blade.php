@@ -21,7 +21,7 @@
         <header class="topbar">
           <div class="title-block">
             <h2>Upload Inventory</h2>
-            <p>Production Manager panel — log and edit inventory batches.</p>
+            <p>Production Manager panel - log and edit inventory batches.</p>
           </div>
           <div class="top-actions">
             <button class="primary-btn" id="openAddModal">
@@ -115,7 +115,7 @@
                       @if ($batch->remarks)
                         <span class="inv-notes" title="{{ $batch->remarks }}">{{ Str::limit($batch->remarks, 40) }}</span>
                       @else
-                        <span style="color:#aaa;">—</span>
+                        <span style="color:#aaa;">-</span>
                       @endif
                     </td>
                     <td>

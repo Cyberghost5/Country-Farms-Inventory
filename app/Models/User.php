@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'phone', 'role', 'company_name', 'state', 'address', 'is_active', 'password'])]
+#[Fillable(['name', 'email', 'phone', 'role', 'company_name', 'state', 'lga', 'address', 'is_active', 'password'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -101,6 +101,11 @@ class User extends Authenticatable
     public function payments()
     {
         return $this->hasMany(Payment::class, 'distributor_id');
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'distributor_id');
     }
 
     public function getRoleLabelAttribute(): string

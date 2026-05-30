@@ -45,7 +45,7 @@
         <header class="topbar">
           <div class="title-block">
             <h2>Reports &amp; Analytics</h2>
-            <p>Oversight panel — monitor system-wide KPIs, sales analytics, and audit log history.</p>
+            <p>Oversight panel - monitor system-wide KPIs, sales analytics, and audit log history.</p>
           </div>
         </header>
 
@@ -125,12 +125,12 @@
                     <td>
                       @if (is_array($log->item_details))
                         <div style="font-size:0.85rem; line-height:1.4; color:#333;">
-                          <div><strong>Batch:</strong> <code style="color:#1d086c;">{{ $log->item_details['batch_number'] ?? '—' }}</code></div>
-                          <div><strong>Product:</strong> {{ $log->item_details['product_name'] ?? '—' }}</div>
+                          <div><strong>Batch:</strong> <code style="color:#1d086c;">{{ $log->item_details['batch_number'] ?? '-' }}</code></div>
+                          <div><strong>Product:</strong> {{ $log->item_details['product_name'] ?? '-' }}</div>
                           <div><strong>Qty:</strong> {{ number_format($log->item_details['quantity'] ?? 0) }}</div>
                         </div>
                       @else
-                        <span style="color:#aaa;">—</span>
+                        <span style="color:#aaa;">-</span>
                       @endif
                     </td>
                     <td>

@@ -122,4 +122,63 @@ class UserManagementTest extends TestCase
         $response->assertStatus(302);
         $response->assertRedirect(route('dashboard'));
     }
+
+    /** @test */
+    public function test_super_admin_can_create_distributor_with_state_and_lga()
+    {
+        $userData = [
+            'name' => 'New Distributor Test',
+            'email' => 'newdist@test.com',
+            'phone' => '08099887766',
+            'role' => 'distributor',
+            'company_name' => 'Test Company',
+            'state' => 'Lagos',
+            'lga' => 'Ikeja',
+            'address' => '123 Test Street',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ];
+
+        $response = $this->actingAs($this->superAdmin)
+            ->post(route('admin.users.store'), $userData);
+
+        $response->assertStatus(302);
+        $response->assertRedirect(route('admin.users.index'));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('users', [
+            'name' => 'New Distributor Test',
+            'phone' => '08099887766',
+            'state' => 'Lagos',
+            'lga' => 'Ikeja',
+        ]);
+    }
+
+    /** @test */
+    public function test_super_admin_can_update_distributor_with_state_and_lga()
+    {
+        $updateData = [
+            'name' => 'Updated Distributor Test',
+            'email' => 'updatedist@test.com',
+            'phone' => '08099887766',
+            'company_name' => 'Updated Test Company',
+            'state' => 'Abuja',
+            'lga' => 'Garki',
+            'address' => '456 Updated Street',
+        ];
+
+        $response = $this->actingAs($this->superAdmin)
+            ->put(route('admin.users.update', $this->distributor->id), $updateData);
+
+        $response->assertStatus(302);
+        $response->assertRedirect(route('admin.users.index'));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('users', [
+            'id' => $this->distributor->id,
+            'name' => 'Updated Distributor Test',
+            'state' => 'Abuja',
+            'lga' => 'Garki',
+        ]);
+    }
 }

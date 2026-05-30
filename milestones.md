@@ -1,6 +1,6 @@
 Proposed Milestone Plan
 
-Milestone 1: Foundation & Auth : Laravel scaffold, 5 roles (super_admin, general_manager, production_manager, store_manager, distributor), login, OTP password reset, role-based dashboards + sidebar — full design matching country-yoghurt
+Milestone 1: Foundation & Auth : Laravel scaffold, 5 roles (super_admin, general_manager, production_manager, store_manager, distributor), login, OTP password reset, role-based dashboards + sidebar - full design matching country-yoghurt
 
 
 Milestone 2: Product & User Management : Super Admin creates master product list (Name, Category, SKU, Size/Volume, Packaging, Unit), creates managers & distributors, sets pricing & per-distributor discounts

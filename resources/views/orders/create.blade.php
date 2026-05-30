@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Record Dispatch - Country Yoghurt MD</title>
+    <title>Place Order - Country Yoghurt MD</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/dashboard.css') }}" />
     <link rel="icon" type="image/png" href="{{ asset('assets/img/logo.png') }}" />
     <style>
-      .dispatch-row {
+      .order-row {
         background: #fdfdfd;
         border: 1px solid #e9ecef;
         border-radius: 8px;
@@ -19,15 +19,11 @@
         margin-bottom: 12px;
         position: relative;
       }
-      .dispatch-row-grid {
+      .order-row-grid {
         display: grid;
         grid-template-columns: 2fr 1fr 1fr 1fr auto;
         gap: 12px;
         align-items: end;
-      }
-      .stock-badge-low {
-        color: #b71c1c;
-        font-weight: 600;
       }
       .total-amount-box {
         background: #f5f4fd;
@@ -38,7 +34,7 @@
         text-align: right;
       }
       @media (max-width: 768px) {
-        .dispatch-row-grid {
+        .order-row-grid {
           grid-template-columns: 1fr;
           gap: 10px;
         }
@@ -54,67 +50,52 @@
       <main class="main-content">
         <header class="topbar">
           <div class="title-block">
-            <h2>Record Dispatch</h2>
-            <p>Store Manager panel - record new dispatch and auto-generate invoice.</p>
+            <h2>Place New Order</h2>
+            <p>Distributor panel - select items and quantities to submit for approval.</p>
           </div>
           <div class="top-actions">
-            <a href="{{ route('store.dispatches.index') }}" class="ghost-btn" style="text-decoration:none;">
-              <i class="bi bi-arrow-left"></i> Back to Log
+            <a href="{{ route('orders.index') }}" class="ghost-btn" style="text-decoration:none;">
+              <i class="bi bi-arrow-left"></i> Back to Orders
             </a>
           </div>
         </header>
 
-        {{-- Flash messages --}}
-        @if (session('success'))
-          <div class="lp-success" style="margin-bottom:14px;"><i class="bi bi-check-circle"></i> {{ session('success') }}</div>
-        @endif
         @if (session('error'))
           <div class="lp-error" style="margin-bottom:14px;"><i class="bi bi-exclamation-circle"></i> {{ session('error') }}</div>
         @endif
 
-        <form method="POST" action="{{ route('store.dispatches.store') }}" id="dispatchForm">
+        <form method="POST" action="{{ route('orders.store') }}" id="orderForm">
           @csrf
 
           <div class="card" style="padding:24px; margin-bottom:20px;">
-            <h3 style="color:#1d086c; margin-bottom:16px;">Dispatch Details</h3>
-            <div class="form-row-2">
-              <div class="form-group">
-                <label for="distributor_id">Select Distributor *</label>
-                <select class="form-input" id="distributor_id" name="distributor_id" required>
-                  <option value="">-- Select Distributor --</option>
-                  @foreach ($distributors as $d)
-                    <option value="{{ $d->id }}">{{ $d->company_name ?: $d->name }} ({{ $d->name }})</option>
-                  @endforeach
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="remarks">Remarks</label>
-                <input class="form-input" type="text" id="remarks" name="remarks" placeholder="Optional notes about transport, vehicle, driver, etc." />
-              </div>
+            <h3 style="color:#1d086c; margin-bottom:16px;">Order Remarks</h3>
+            <div class="form-group">
+              <label for="remarks">Special Instructions / Remarks</label>
+              <textarea class="form-input" id="remarks" name="remarks" rows="2" placeholder="Optional notes for delivery schedule, packaging choices, etc."></textarea>
             </div>
           </div>
 
           <div class="card" style="padding:24px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-              <h3 style="color:#1d086c; margin:0;">Dispatch Items</h3>
+              <h3 style="color:#1d086c; margin:0;">Order Items</h3>
               <button type="button" class="ghost-btn btn-sm" id="addRowBtn">
                 <i class="bi bi-plus-lg"></i> Add Item
               </button>
             </div>
 
-            <div id="dispatchItemsContainer">
-              {{-- Rows will be appended here dynamically by JS --}}
+            <div id="orderItemsContainer">
+              {{-- Dynamic item rows will be appended here --}}
             </div>
 
             <div class="total-amount-box">
-              <span style="font-size:1.1rem; color:#666;">Total Value:</span>
+              <span style="font-size:1.1rem; color:#666;">Total Order Value:</span>
               <h2 style="color:#1d086c; margin: 4px 0 0;" id="totalAmountDisp">₦0.00</h2>
             </div>
 
             <div style="margin-top:20px; display:flex; justify-content:flex-end; gap:12px;">
-              <a href="{{ route('store.dispatches.index') }}" class="ghost-btn" style="text-decoration:none;">Cancel</a>
+              <a href="{{ route('orders.index') }}" class="ghost-btn" style="text-decoration:none;">Cancel</a>
               <button type="submit" class="primary-btn" id="submitBtn" disabled>
-                <i class="bi bi-check-lg"></i> Complete Dispatch
+                <i class="bi bi-send"></i> Submit Order
               </button>
             </div>
           </div>
@@ -122,7 +103,6 @@
       </main>
     </div>
 
-    {{-- Script data preloading --}}
     <script>
       const pricingMap = @json($pricingMap);
       const products = @json($products);
@@ -132,34 +112,23 @@
         // Add initial row
         addNewRow();
 
-        // Register handlers
-        document.getElementById('distributor_id').addEventListener('change', () => {
-          updateAllPrices();
-          updateTotal();
-        });
         document.getElementById('addRowBtn').addEventListener('click', addNewRow);
-
-        document.getElementById('dispatchForm').addEventListener('submit', (e) => {
-          if (!validateStock()) {
-            e.preventDefault();
-          }
-        });
       });
 
       function addNewRow() {
-        const container = document.getElementById('dispatchItemsContainer');
+        const container = document.getElementById('orderItemsContainer');
         const idx = rowIndex++;
 
         const row = document.createElement('div');
-        row.className = 'dispatch-row';
+        row.className = 'order-row';
         row.id = `row-${idx}`;
 
         const prodOptions = products.map(p => 
-          `<option value="${p.id}" data-stock="${p.available_stock}">${esc(p.name)} (SKU: ${esc(p.sku)})</option>`
+          `<option value="${p.id}" data-stock="${p.available_stock}">${esc(p.name)} (${esc(p.size_volume)})</option>`
         ).join('');
 
         row.innerHTML = `
-          <div class="dispatch-row-grid">
+          <div class="order-row-grid">
             <div class="form-group" style="margin:0;">
               <label>Product *</label>
               <select class="form-input product-select" name="items[${idx}][product_id]" required>
@@ -187,10 +156,7 @@
           </div>
           <div style="margin-top:8px; display:flex; justify-content:space-between;">
             <span class="stock-indicator" style="font-size:0.8rem; color:#666; visibility:hidden;">
-              Available Stock: <strong class="stock-qty">0</strong>
-            </span>
-            <span class="stock-error" style="font-size:0.8rem; color:#b71c1c; font-weight:600; display:none;">
-              Insufficient stock!
+              Current Available Factory Stock: <strong class="stock-qty">0</strong>
             </span>
           </div>
         `;
@@ -221,10 +187,8 @@
         const stockQty = row.querySelector('.stock-qty');
         const priceInput = row.querySelector('.price-input');
         const subtotalInput = row.querySelector('.subtotal-input');
-        const stockErr = row.querySelector('.stock-error');
 
         const prodId = select.value;
-        const distId = document.getElementById('distributor_id').value;
 
         if (!prodId) {
           qtyInput.disabled = true;
@@ -232,7 +196,6 @@
           stockInd.style.visibility = 'hidden';
           priceInput.value = '-';
           subtotalInput.value = '-';
-          stockErr.style.display = 'none';
           updateTotal();
           return;
         }
@@ -246,111 +209,29 @@
         stockQty.textContent = numberFormat(stock);
         stockInd.style.visibility = 'visible';
 
-        if (distId && pricingMap[distId] && pricingMap[distId][prodId] !== undefined) {
-          const price = pricingMap[distId][prodId];
-          priceInput.value = numberFormat(price, 2);
-          subtotalInput.value = numberFormat(price * qtyInput.value, 2);
-        } else {
-          // Default to product base price
-          const prodObj = products.find(p => p.id == prodId);
-          const price = prodObj ? prodObj.base_price : 0;
-          priceInput.value = numberFormat(price, 2);
-          subtotalInput.value = numberFormat(price * qtyInput.value, 2);
-        }
+        const price = pricingMap[prodId] !== undefined ? pricingMap[prodId] : 0;
+        priceInput.value = numberFormat(price, 2);
+        subtotalInput.value = numberFormat(price * qtyInput.value, 2);
 
-        validateRowStock(row);
         updateTotal();
       }
 
       function handleQtyChange(row) {
         const select = row.querySelector('.product-select');
         const qtyInput = row.querySelector('.qty-input');
-        const priceInput = row.querySelector('.price-input');
         const subtotalInput = row.querySelector('.subtotal-input');
 
-        const distId = document.getElementById('distributor_id').value;
         const prodId = select.value;
         const qty = parseInt(qtyInput.value) || 0;
 
-        let price = 0;
-        if (prodId && distId && pricingMap[distId] && pricingMap[distId][prodId] !== undefined) {
-          price = pricingMap[distId][prodId];
-        } else if (prodId) {
-          const prodObj = products.find(p => p.id == prodId);
-          price = prodObj ? prodObj.base_price : 0;
-        }
-
+        const price = prodId && pricingMap[prodId] !== undefined ? pricingMap[prodId] : 0;
         subtotalInput.value = numberFormat(price * qty, 2);
 
-        validateRowStock(row);
         updateTotal();
       }
 
-      function updateAllPrices() {
-        const distId = document.getElementById('distributor_id').value;
-        const rows = document.querySelectorAll('.dispatch-row');
-
-        rows.forEach(row => {
-          const select = row.querySelector('.product-select');
-          const qtyInput = row.querySelector('.qty-input');
-          const priceInput = row.querySelector('.price-input');
-          const subtotalInput = row.querySelector('.subtotal-input');
-
-          const prodId = select.value;
-          if (!prodId) return;
-
-          const qty = parseInt(qtyInput.value) || 0;
-
-          if (distId && pricingMap[distId] && pricingMap[distId][prodId] !== undefined) {
-            const price = pricingMap[distId][prodId];
-            priceInput.value = numberFormat(price, 2);
-            subtotalInput.value = numberFormat(price * qty, 2);
-          }
-        });
-      }
-
-      function validateRowStock(row) {
-        const select = row.querySelector('.product-select');
-        const qtyInput = row.querySelector('.qty-input');
-        const stockQty = row.querySelector('.stock-qty');
-        const stockErr = row.querySelector('.stock-error');
-
-        const prodId = select.value;
-        if (!prodId) return true;
-
-        const selectedOption = select.options[select.selectedIndex];
-        const stock = parseInt(selectedOption.getAttribute('data-stock'));
-        const qty = parseInt(qtyInput.value) || 0;
-
-        if (qty > stock) {
-          stockQty.parentElement.classList.add('stock-badge-low');
-          stockErr.style.display = 'block';
-          return false;
-        } else {
-          stockQty.parentElement.classList.remove('stock-badge-low');
-          stockErr.style.display = 'none';
-          return true;
-        }
-      }
-
-      function validateStock() {
-        let valid = true;
-        const rows = document.querySelectorAll('.dispatch-row');
-        rows.forEach(row => {
-          if (!validateRowStock(row)) {
-            valid = false;
-          }
-        });
-
-        if (!valid) {
-          alert('One or more items exceed available stock levels. Please correct quantities.');
-        }
-        return valid;
-      }
-
       function updateTotal() {
-        const distId = document.getElementById('distributor_id').value;
-        const rows = document.querySelectorAll('.dispatch-row');
+        const rows = document.querySelectorAll('.order-row');
         let total = 0;
 
         rows.forEach(row => {
@@ -361,14 +242,7 @@
           if (!prodId) return;
 
           const qty = parseInt(qtyInput.value) || 0;
-          let price = 0;
-
-          if (distId && pricingMap[distId] && pricingMap[distId][prodId] !== undefined) {
-            price = pricingMap[distId][prodId];
-          } else {
-            const prodObj = products.find(p => p.id == prodId);
-            price = prodObj ? prodObj.base_price : 0;
-          }
+          const price = pricingMap[prodId] !== undefined ? pricingMap[prodId] : 0;
 
           total += price * qty;
         });
@@ -378,11 +252,10 @@
       }
 
       function updateSubmitState() {
-        const distId = document.getElementById('distributor_id').value;
-        const rowsCount = document.querySelectorAll('.dispatch-row').length;
+        const rowsCount = document.querySelectorAll('.order-row').length;
         const submitBtn = document.getElementById('submitBtn');
 
-        if (distId && rowsCount > 0) {
+        if (rowsCount > 0) {
           submitBtn.removeAttribute('disabled');
         } else {
           submitBtn.setAttribute('disabled', 'true');

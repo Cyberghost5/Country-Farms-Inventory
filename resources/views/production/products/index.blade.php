@@ -21,7 +21,7 @@
         <header class="topbar">
           <div class="title-block">
             <h2>Products</h2>
-            <p>Active product directory — view product specifications.</p>
+            <p>Active product directory - view product specifications.</p>
           </div>
         </header>
 
@@ -71,8 +71,8 @@
                     </td>
                     <td><code class="sku-code">{{ $product->sku }}</code></td>
                     <td><span class="cat-pill cat-{{ $product->category }}">{{ ucfirst($product->category) }}</span></td>
-                    <td>{{ $product->size_volume ?: '—' }}</td>
-                    <td>{{ $product->packaging_type ?: '—' }}</td>
+                    <td>{{ $product->size_volume ?: '-' }}</td>
+                    <td>{{ $product->packaging_type ?: '-' }}</td>
                     <td>{{ ucfirst($product->unit) }}</td>
                   </tr>
                 @empty

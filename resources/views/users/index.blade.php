@@ -94,8 +94,8 @@
                     <td><code class="sku-code">{{ $u->phone }}</code></td>
                     <td><span class="role-badge role-{{ str_replace('_','-',$u->role) }}">{{ $u->role_label }}</span></td>
                     <td>
-                      {{ $u->company_name ?: '—' }}
-                      @if ($u->state) <span class="inv-notes">{{ $u->state }}</span> @endif
+                      {{ $u->company_name ?: '-' }}
+                      @if ($u->state) <span class="inv-notes">{{ $u->state }}{{ $u->lga ? ' - ' . $u->lga : '' }}</span> @endif
                     </td>
                     <td>
                       @if ($u->is_active)

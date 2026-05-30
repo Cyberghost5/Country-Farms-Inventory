@@ -5,8 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['distributor_id', 'type', 'value', 'applies_to', 'applies_value', 'is_active', 'notes', 'created_by'])]
-class DistributorDiscount extends Model
+#[Fillable(['state', 'type', 'value', 'applies_to', 'applies_value', 'is_active', 'notes', 'created_by'])]
+class StateDiscount extends Model
 {
     protected function casts(): array
     {
@@ -14,11 +14,6 @@ class DistributorDiscount extends Model
             'value'     => 'decimal:2',
             'is_active' => 'boolean',
         ];
-    }
-
-    public function distributor()
-    {
-        return $this->belongsTo(User::class, 'distributor_id');
     }
 
     public function creator()
