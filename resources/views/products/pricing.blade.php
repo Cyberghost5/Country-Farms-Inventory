@@ -77,8 +77,8 @@
 
         <header class="topbar">
           <div class="title-block">
-            <h2>Distributor Pricing</h2>
-            <p>Set custom product prices and discounts per distributor.</p>
+            <h2>State-wide Pricing</h2>
+            <p>Set custom product prices and discounts per state.</p>
           </div>
         </header>
 
@@ -86,26 +86,22 @@
           <div class="lp-success" style="margin-bottom:14px;"><i class="bi bi-check-circle"></i> {{ session('success') }}</div>
         @endif
 
-        {{-- Distributor selector --}}
+        {{-- State selector --}}
         <section class="card" style="margin-bottom:16px;padding:18px 24px;">
           <form method="GET" action="{{ route('admin.pricing.index') }}" class="inv-filters">
-            <label style="font-weight:600;font-size:.9rem;color:#1d086c;">Distributor:</label>
-            <select name="distributor_id" class="filter-select" onchange="this.form.submit()" style="min-width:220px;">
-              @foreach ($distributors as $dist)
-                <option value="{{ $dist->id }}" {{ $selected?->id === $dist->id ? 'selected' : '' }}>
-                  {{ $dist->name }} {{ $dist->company_name ? '- '.$dist->company_name : '' }}
-                </option>
-              @endforeach
+            <label style="font-weight:600;font-size:.9rem;color:#1d086c;">State:</label>
+            <select name="state" id="topStateSelect" class="filter-select" onchange="this.form.submit()" style="min-width:220px;">
+              <!-- Populated via JS -->
             </select>
           </form>
         </section>
 
-        @if ($selected)
+        @if ($selectedState)
           {{-- Pricing table --}}
           <section class="card table-card" style="margin-bottom:24px;">
             <div class="section-head" style="padding:18px 24px 0;">
               <h3 style="font-size:1rem;color:#1d086c;font-weight:600;">
-                <i class="bi bi-tags"></i> Product Prices for {{ $selected->name }}
+                <i class="bi bi-tags"></i> Product Prices for {{ $selectedState }} State
               </h3>
               <p style="color:#888;font-size:.85rem;margin:4px 0 16px;">
                 Leave price blank to use the global base price.
@@ -113,7 +109,7 @@
             </div>
             <form method="POST" action="{{ route('admin.pricing.save') }}">
               @csrf
-              <input type="hidden" name="distributor_id" value="{{ $selected->id }}" />
+              <input type="hidden" name="state" value="{{ $selectedState }}" />
               <div class="table-scroll">
                 <table class="inv-table">
                   <thead>
@@ -158,7 +154,7 @@
           <section class="card" style="padding:0 0 24px;">
             <div class="section-head" style="padding:18px 24px 12px;border-bottom:1px solid #f0ebe0;display:flex;align-items:center;justify-content:space-between;">
               <div>
-                <h3 style="font-size:1rem;color:#1d086c;font-weight:600;"><i class="bi bi-percent"></i> State-wide Discounts</h3>
+                <h3 style="font-size:1rem;color:#1d086c;font-weight:600;"><i class="bi bi-percent"></i> Discounts for {{ $selectedState }} State</h3>
                 <p style="color:#888;font-size:.85rem;margin-top:4px;">Active state-wide discount rules applied at order/dispatch time.</p>
               </div>
               <button class="primary-btn" id="openDiscountModal">
@@ -167,13 +163,12 @@
             </div>
 
             @if ($discounts->isEmpty())
-              <p style="padding:20px 24px;color:#999;font-size:.9rem;">No state-wide discount rules set.</p>
+              <p style="padding:20px 24px;color:#999;font-size:.9rem;">No state-wide discount rules set for {{ $selectedState }}.</p>
             @else
               <div class="table-scroll">
                 <table class="inv-table">
                   <thead>
                     <tr>
-                      <th>State</th>
                       <th>Type</th>
                       <th>Applies To</th>
                       <th>Description</th>
@@ -184,7 +179,6 @@
                   <tbody>
                     @foreach ($discounts as $disc)
                       <tr>
-                        <td><strong>{{ $disc->state }}</strong></td>
                         <td>{{ ucfirst($disc->type) }}</td>
                         <td>
                           {{ ucfirst($disc->applies_to) }}@if ($disc->applies_value): {{ $disc->applies_to === 'product' && $disc->product ? $disc->product->name : ucfirst($disc->applies_value) }}@endif
@@ -367,20 +361,34 @@
     <script>
       document.addEventListener('DOMContentLoaded', function () {
         const stateSelect = document.getElementById('stateSelect');
-        const selectedDistributorState = "{{ $selected?->state }}";
+        const topStateSelect = document.getElementById('topStateSelect');
+        const currentSelectedState = "{{ $selectedState }}";
 
-        if (window.statesAndLgas && stateSelect) {
-          // Populate states
+        if (window.statesAndLgas) {
+          // Populate both selectors
           for (const state in window.statesAndLgas) {
             if (window.statesAndLgas.hasOwnProperty(state)) {
               if (state === 'FCT') continue; // Skip redundant alias key in list
-              const opt = document.createElement('option');
-              opt.value = state;
-              opt.textContent = state;
-              if (state === selectedDistributorState) {
-                opt.selected = true;
+              
+              if (stateSelect) {
+                const opt = document.createElement('option');
+                opt.value = state;
+                opt.textContent = state;
+                if (state === currentSelectedState) {
+                  opt.selected = true;
+                }
+                stateSelect.appendChild(opt);
               }
-              stateSelect.appendChild(opt);
+
+              if (topStateSelect) {
+                const opt = document.createElement('option');
+                opt.value = state;
+                opt.textContent = state;
+                if (state === currentSelectedState) {
+                  opt.selected = true;
+                }
+                topStateSelect.appendChild(opt);
+              }
             }
           }
         }

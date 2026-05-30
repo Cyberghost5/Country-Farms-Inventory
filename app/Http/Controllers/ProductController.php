@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\StateDiscount;
-use App\Models\DistributorPricing;
+use App\Models\StatePricing;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -122,19 +122,16 @@ class ProductController extends Controller
         $user = Auth::user();
         abort_unless($user->isSuperAdmin(), 403);
 
-        $distributors = User::where('role', 'distributor')
+        $selectedState = $request->input('state', 'Lagos');
+
+        $products  = Product::where('is_active', true)->orderBy('category')->orderBy('name')->get();
+        $pricing   = StatePricing::where('state', $selectedState)->pluck('price', 'product_id');
+        $discounts = StateDiscount::with('product')
+            ->where('state', $selectedState)
             ->where('is_active', true)
-            ->orderBy('name')
             ->get();
 
-        $selectedId  = $request->input('distributor_id');
-        $selected    = $selectedId ? User::find($selectedId) : $distributors->first();
-
-        $products    = Product::where('is_active', true)->orderBy('category')->orderBy('name')->get();
-        $pricing     = DistributorPricing::where('distributor_id', $selected?->id)->pluck('price', 'product_id');
-        $discounts   = StateDiscount::with('product')->where('is_active', true)->orderBy('state')->get();
-
-        return view('products.pricing', compact('user', 'distributors', 'selected', 'products', 'pricing', 'discounts'));
+        return view('products.pricing', compact('user', 'selectedState', 'products', 'pricing', 'discounts'));
     }
 
     public function savePricing(Request $request)
@@ -142,22 +139,22 @@ class ProductController extends Controller
         abort_unless(Auth::user()->isSuperAdmin(), 403);
 
         $request->validate([
-            'distributor_id' => ['required', 'exists:users,id'],
-            'prices'         => ['required', 'array'],
-            'prices.*'       => ['nullable', 'numeric', 'min:0'],
+            'state'    => ['required', 'string'],
+            'prices'   => ['required', 'array'],
+            'prices.*' => ['nullable', 'numeric', 'min:0'],
         ]);
 
-        $distributorId = $request->input('distributor_id');
+        $state = $request->input('state');
 
         foreach ($request->input('prices', []) as $productId => $price) {
             if ($price === null || $price === '') {
-                DistributorPricing::where('distributor_id', $distributorId)
+                StatePricing::where('state', $state)
                     ->where('product_id', $productId)
                     ->delete();
                 continue;
             }
-            DistributorPricing::updateOrCreate(
-                ['distributor_id' => $distributorId, 'product_id' => $productId],
+            StatePricing::updateOrCreate(
+                ['state' => $state, 'product_id' => $productId],
                 ['price' => $price]
             );
         }

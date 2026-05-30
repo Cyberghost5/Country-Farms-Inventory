@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Models\StateDiscount;
+use App\Models\StatePricing;
 
 #[Fillable(['name', 'sku', 'category', 'size_volume', 'packaging_type', 'unit', 'base_price', 'description', 'is_active', 'created_by'])]
 class Product extends Model
@@ -31,9 +32,9 @@ class Product extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function distributorPricing()
+    public function statePricing()
     {
-        return $this->hasMany(DistributorPricing::class);
+        return $this->hasMany(StatePricing::class);
     }
 
     public function batches()
@@ -67,10 +68,16 @@ class Product extends Model
     /** Price for a specific distributor (falls back to base_price) */
     public function priceForDistributor(int $distributorId): float
     {
-        $custom = $this->distributorPricing()
-            ->where('distributor_id', $distributorId)
-            ->first();
-        return $custom ? (float) $custom->price : (float) $this->base_price;
+        $distributor = User::find($distributorId);
+        if ($distributor && $distributor->state) {
+            $custom = StatePricing::where('product_id', $this->id)
+                ->where('state', $distributor->state)
+                ->first();
+            if ($custom) {
+                return (float) $custom->price;
+            }
+        }
+        return (float) $this->base_price;
     }
 
     /** Calculate net price for a specific distributor, applying custom pricing and active discounts */

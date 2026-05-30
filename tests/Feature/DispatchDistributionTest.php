@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\StateDiscount;
-use App\Models\DistributorPricing;
+use App\Models\StatePricing;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Product;
@@ -81,8 +81,8 @@ class DispatchDistributionTest extends TestCase
         $this->assertEquals(1000.00, $this->yoghurt->calculatedPriceForDistributor($this->distributor->id));
 
         // 2. Set Custom pricing to 900.00
-        DistributorPricing::create([
-            'distributor_id' => $this->distributor->id,
+        StatePricing::create([
+            'state' => 'Lagos',
             'product_id' => $this->yoghurt->id,
             'price' => 900.00,
         ]);
