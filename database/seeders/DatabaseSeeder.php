@@ -17,11 +17,11 @@ class DatabaseSeeder extends Seeder
     {
         // Super Admin
         User::updateOrCreate(
-            ['phone' => '2348000000001'],
+            ['phone' => '08000000001'],
             [
                 'name'     => 'Super Admin',
                 'email'    => 'superadmin@countryyoghurt.com',
-                'phone'    => '2348000000001',
+                'phone'    => '08000000001',
                 'role'     => 'super_admin',
                 'password' => bcrypt('password'),
                 'is_active'=> true,
@@ -30,11 +30,11 @@ class DatabaseSeeder extends Seeder
 
         // General Manager
         User::updateOrCreate(
-            ['phone' => '2348000000002'],
+            ['phone' => '08000000002'],
             [
                 'name'     => 'General Manager',
                 'email'    => 'gm@countryyoghurt.com',
-                'phone'    => '2348000000002',
+                'phone'    => '08000000002',
                 'role'     => 'general_manager',
                 'password' => bcrypt('password'),
                 'is_active'=> true,
@@ -43,11 +43,11 @@ class DatabaseSeeder extends Seeder
 
         // Production Manager
         User::updateOrCreate(
-            ['phone' => '2348000000003'],
+            ['phone' => '08000000003'],
             [
                 'name'     => 'Production Manager',
                 'email'    => 'production@countryyoghurt.com',
-                'phone'    => '2348000000003',
+                'phone'    => '08000000003',
                 'role'     => 'production_manager',
                 'password' => bcrypt('password'),
                 'is_active'=> true,
@@ -56,11 +56,11 @@ class DatabaseSeeder extends Seeder
 
         // Store Manager
         User::updateOrCreate(
-            ['phone' => '2348000000004'],
+            ['phone' => '08000000004'],
             [
                 'name'     => 'Store Manager',
                 'email'    => 'store@countryyoghurt.com',
-                'phone'    => '2348000000004',
+                'phone'    => '08000000004',
                 'role'     => 'store_manager',
                 'password' => bcrypt('password'),
                 'is_active'=> true,
@@ -69,11 +69,11 @@ class DatabaseSeeder extends Seeder
 
         // Sample Distributor
         User::updateOrCreate(
-            ['phone' => '2348000000005'],
+            ['phone' => '08000000005'],
             [
                 'name'         => 'Demo Distributor',
                 'email'        => 'distributor@demo.com',
-                'phone'        => '2348000000005',
+                'phone'        => '08000000005',
                 'role'         => 'distributor',
                 'company_name' => 'Demo Distribution Ltd',
                 'state'        => 'Lagos',

@@ -26,7 +26,8 @@ class LoginController extends Controller
 
         $phone      = $request->input('phone');
         $remember   = $request->boolean('remember');
-        $normalised = $this->normalisePhone($phone);
+        // $normalised = $this->normalisePhone($phone);
+        $normalised = $phone;
 
         $user = User::where('phone', $phone)->orWhere('phone', $normalised)->first();
 

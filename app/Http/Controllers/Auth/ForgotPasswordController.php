@@ -20,7 +20,8 @@ class ForgotPasswordController extends Controller
         $request->validate(['phone' => ['required', 'string']]);
 
         $phone      = $request->input('phone');
-        $normalised = $this->normalisePhone($phone);
+        // $normalised = $this->normalisePhone($phone);
+        $normalised = $phone;
 
         $user = User::where('phone', $phone)->orWhere('phone', $normalised)->first();
 

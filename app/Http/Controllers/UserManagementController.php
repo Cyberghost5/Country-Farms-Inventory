@@ -68,7 +68,8 @@ class UserManagementController extends Controller
             'password'     => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        $data['phone']    = $this->normalisePhone($data['phone']);
+        // $data['phone']    = $this->normalisePhone($data['phone']);
+        $data['phone']    = $data['phone'];
         $data['password'] = Hash::make($data['password']);
         $data['is_active']= true;
 
