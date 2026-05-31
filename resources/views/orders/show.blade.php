@@ -17,6 +17,9 @@
         gap: 24px;
         margin-bottom: 24px;
       }
+      .desktop-table-view table {
+        min-width: auto !important;
+      }
       .info-card {
         background: #ffffff;
         border: 1px solid #eef0f6;
