@@ -89,7 +89,7 @@ class DistributorController extends Controller
             'amount'           => ['required', 'numeric', 'min:0.01'],
             'payment_date'     => ['required', 'date'],
             'payment_method'   => ['required', 'string', 'max:50'],
-            'proof_of_payment' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
+            'proof_of_payment' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
         ]);
 
         $invoice = Invoice::where('distributor_id', $user->id)
@@ -109,8 +109,11 @@ class DistributorController extends Controller
             return back()->with('error', 'Payment amount of ₦' . number_format($amount, 2) . ' cannot exceed outstanding invoice balance of ₦' . number_format($invoice->due_amount, 2));
         }
 
-        // Store the uploaded proof of payment file on the public disk
-        $path = $request->file('proof_of_payment')->store('proofs', 'public');
+        // Store the uploaded proof of payment file on the public disk if provided
+        $path = null;
+        if ($request->hasFile('proof_of_payment')) {
+            $path = $request->file('proof_of_payment')->store('proofs', 'public');
+        }
 
         try {
             DB::transaction(function () use ($invoice, $user, $amount, $request, $path) {

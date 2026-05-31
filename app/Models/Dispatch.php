@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 
 #[Fillable([
     'distributor_id',
+    'state',
     'dispatch_number',
     'status',
     'dispatched_by',

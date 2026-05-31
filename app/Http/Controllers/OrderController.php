@@ -77,13 +77,18 @@ class OrderController extends Controller
                 return $product;
             });
 
-        // Preload pricing map for this distributor
+        $operatingAreas = $user->operatingAreas;
+
+        // Preload pricing map for this distributor's states
         $pricingMap = [];
-        foreach ($products as $product) {
-            $pricingMap[$product->id] = $product->calculatedPriceForDistributor($user->id);
+        foreach ($operatingAreas as $area) {
+            $pricingMap[$area->state] = [];
+            foreach ($products as $product) {
+                $pricingMap[$area->state][$product->id] = $product->calculatedPriceForDistributor($user->id, $area->state);
+            }
         }
 
-        return view('orders.create', compact('user', 'products', 'pricingMap'));
+        return view('orders.create', compact('user', 'products', 'pricingMap', 'operatingAreas'));
     }
 
     /**
@@ -95,14 +100,21 @@ class OrderController extends Controller
         abort_unless($user->isDistributor(), 403);
 
         $request->validate([
+            'state' => ['required', 'string'],
             'remarks' => ['nullable', 'string', 'max:500'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'exists:products,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
         ]);
 
+        $state = $request->input('state');
+        $operatesInState = $user->operatingAreas()->where('state', $state)->exists();
+        if (!$operatesInState) {
+            return back()->with('error', 'You are not registered to operate in ' . $state)->withInput();
+        }
+
         try {
-            $order = DB::transaction(function () use ($request, $user) {
+            $order = DB::transaction(function () use ($request, $user, $state) {
                 $today = now()->format('Ymd');
                 $count = Order::whereDate('created_at', now()->toDateString())->count() + 1;
                 $orderNumber = 'ORD-' . $today . '-' . str_pad($count, 4, '0', STR_PAD_LEFT);
@@ -117,7 +129,7 @@ class OrderController extends Controller
                         throw new \Exception('Product "' . $product->name . '" is currently inactive.');
                     }
 
-                    $unitPrice = (float) $product->calculatedPriceForDistributor($user->id);
+                    $unitPrice = (float) $product->calculatedPriceForDistributor($user->id, $state);
                     $subtotal = $unitPrice * (int) $item['quantity'];
                     $totalAmount += $subtotal;
 
@@ -131,6 +143,7 @@ class OrderController extends Controller
 
                 $order = Order::create([
                     'distributor_id' => $user->id,
+                    'state' => $state,
                     'order_number' => $orderNumber,
                     'status' => 'pending',
                     'total_amount' => $totalAmount,

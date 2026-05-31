@@ -7,6 +7,7 @@ use App\Models\DispatchItem;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\User;
+use App\Models\UserOperatingArea;
 use App\Notifications\DispatchCompletedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -50,16 +51,30 @@ class DispatchController extends Controller
                 return $product;
             });
 
-        // Preload pricing map for the frontend JavaScript to display unit prices instantly
+        $distributors = User::where('role', 'distributor')
+            ->where('is_active', true)
+            ->with('operatingAreas')
+            ->orderBy('name')
+            ->get();
+
+        // Get unique operating states from active distributors
+        $operatingStates = UserOperatingArea::whereHas('user', function ($q) {
+            $q->where('role', 'distributor')->where('is_active', true);
+        })
+        ->distinct()
+        ->pluck('state')
+        ->toArray();
+
+        // Preload pricing map per state for the frontend JS to display unit prices instantly
         $pricingMap = [];
-        foreach ($distributors as $distributor) {
-            $pricingMap[$distributor->id] = [];
+        foreach ($operatingStates as $state) {
+            $pricingMap[$state] = [];
             foreach ($products as $product) {
-                $pricingMap[$distributor->id][$product->id] = $product->calculatedPriceForDistributor($distributor->id);
+                $pricingMap[$state][$product->id] = $product->calculatedPriceForState($state);
             }
         }
 
-        return view('store.dispatches.create', compact('user', 'distributors', 'products', 'pricingMap'));
+        return view('store.dispatches.create', compact('user', 'distributors', 'products', 'pricingMap', 'operatingStates'));
     }
 
     public function store(Request $request)
@@ -69,6 +84,7 @@ class DispatchController extends Controller
 
         $request->validate([
             'distributor_id' => ['required', 'exists:users,id'],
+            'state'          => ['required', 'string'],
             'remarks'        => ['nullable', 'string'],
             'items'          => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'exists:products,id'],
@@ -77,13 +93,20 @@ class DispatchController extends Controller
 
         $distributorId = $request->input('distributor_id');
         $distributor = User::findOrFail($distributorId);
+        $state = $request->input('state');
 
         if (!$distributor->is_active) {
             return back()->with('error', 'Cannot dispatch to an inactive distributor.')->withInput();
         }
 
+        // Validate distributor operates in the selected state
+        $operatesInState = $distributor->operatingAreas()->where('state', $state)->exists();
+        if (!$operatesInState) {
+            return back()->with('error', 'The selected distributor does not operate in ' . $state)->withInput();
+        }
+
         try {
-            $dispatch = DB::transaction(function () use ($request, $user, $distributorId) {
+            $dispatch = DB::transaction(function () use ($request, $user, $distributorId, $state) {
                 // Generate unique dispatch number
                 $today = now()->format('Ymd');
                 $dispatchCount = Dispatch::whereDate('created_at', now()->toDateString())->count() + 1;
@@ -103,7 +126,7 @@ class DispatchController extends Controller
                         throw new \Exception('Insufficient stock for product "' . $product->name . '". Only ' . $availableStock . ' available.');
                     }
 
-                    $unitPrice = $product->calculatedPriceForDistributor($distributorId);
+                    $unitPrice = $product->calculatedPriceForDistributor($distributorId, $state);
                     $subtotal = $unitPrice * $item['quantity'];
                     $totalAmount += $subtotal;
 
@@ -118,6 +141,7 @@ class DispatchController extends Controller
                 // Create dispatch
                 $dispatch = Dispatch::create([
                     'distributor_id'  => $distributorId,
+                    'state'           => $state,
                     'dispatch_number' => $dispatchNumber,
                     'status'          => 'dispatched',
                     'dispatched_by'   => $user->id,

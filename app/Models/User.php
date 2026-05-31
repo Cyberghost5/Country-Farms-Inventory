@@ -108,6 +108,11 @@ class User extends Authenticatable
         return $this->hasMany(Order::class, 'distributor_id');
     }
 
+    public function operatingAreas()
+    {
+        return $this->hasMany(UserOperatingArea::class);
+    }
+
     public function getRoleLabelAttribute(): string
     {
         return match($this->role) {

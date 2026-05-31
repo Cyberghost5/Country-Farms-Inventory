@@ -234,4 +234,27 @@ class DistributorPaymentUploadTest extends TestCase
         $response->assertStatus(302);
         $response->assertSessionHas('error', 'A payment proof has already been submitted for this invoice and is awaiting approval.');
     }
+
+    /** @test */
+    public function test_distributor_can_upload_payment_without_proof()
+    {
+        $response = $this->actingAs($this->distributor)
+            ->post(route('distributor.payments.upload'), [
+                'invoice_id' => $this->invoice->id,
+                'amount' => 40000.00,
+                'payment_date' => now()->toDateString(),
+                'payment_method' => 'bank_transfer',
+            ]);
+
+        $response->assertStatus(302);
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('payments', [
+            'invoice_id' => $this->invoice->id,
+            'amount' => 40000.00,
+            'status' => 'pending',
+            'reference' => null,
+            'recorded_by' => $this->distributor->id,
+        ]);
+    }
 }

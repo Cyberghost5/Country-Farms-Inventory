@@ -65,32 +65,19 @@ class Product extends Model
         return "{$prefix}-{$slug}-{$suffix}";
     }
 
-    /** Price for a specific distributor (falls back to base_price) */
-    public function priceForDistributor(int $distributorId): float
+    public function priceForState(string $state): float
     {
-        $distributor = User::find($distributorId);
-        if ($distributor && $distributor->state) {
-            $custom = StatePricing::where('product_id', $this->id)
-                ->where('state', $distributor->state)
-                ->first();
-            if ($custom) {
-                return (float) $custom->price;
-            }
-        }
-        return (float) $this->base_price;
+        $custom = StatePricing::where('product_id', $this->id)
+            ->where('state', $state)
+            ->first();
+        return $custom ? (float) $custom->price : (float) $this->base_price;
     }
 
-    /** Calculate net price for a specific distributor, applying custom pricing and active discounts */
-    public function calculatedPriceForDistributor(int $distributorId): float
+    public function calculatedPriceForState(string $state): float
     {
-        $price = $this->priceForDistributor($distributorId);
+        $price = $this->priceForState($state);
 
-        $distributor = User::find($distributorId);
-        if (!$distributor || !$distributor->state) {
-            return max(0.0, (float) $price);
-        }
-
-        $discounts = StateDiscount::where('state', $distributor->state)
+        $discounts = StateDiscount::where('state', $state)
             ->where('is_active', true)
             ->get();
 
@@ -114,6 +101,35 @@ class Product extends Model
         }
 
         return max(0.0, (float) $price);
+    }
+
+    /** Price for a specific distributor (falls back to base_price) */
+    public function priceForDistributor(int $distributorId, ?string $state = null): float
+    {
+        $distributor = User::find($distributorId);
+        if ($distributor) {
+            $state = $state ?: ($distributor->operatingAreas()->first()?->state ?? $distributor->state);
+            if ($state) {
+                return $this->priceForState($state);
+            }
+        }
+        return (float) $this->base_price;
+    }
+
+    /** Calculate net price for a specific distributor, applying custom pricing and active discounts */
+    public function calculatedPriceForDistributor(int $distributorId, ?string $state = null): float
+    {
+        $distributor = User::find($distributorId);
+        if (!$distributor) {
+            return max(0.0, (float) $this->base_price);
+        }
+
+        $state = $state ?: ($distributor->operatingAreas()->first()?->state ?? $distributor->state);
+        if (!$state) {
+            return max(0.0, (float) $this->priceForDistributor($distributorId, $state));
+        }
+
+        return $this->calculatedPriceForState($state);
     }
 
     public function getCategoryLabelAttribute(): string

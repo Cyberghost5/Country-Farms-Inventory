@@ -249,8 +249,8 @@
                   </select>
                 </div>
                 <div class="form-group">
-                  <label for="upload_proof">Proof of Payment * (Image or PDF only)</label>
-                  <input class="form-input" type="file" id="upload_proof" name="proof_of_payment" accept="image/*,application/pdf" required />
+                  <label for="upload_proof">Proof of Payment (Image or PDF only)</label>
+                  <input class="form-input" type="file" id="upload_proof" name="proof_of_payment" accept="image/*,application/pdf" />
                 </div>
               </div>
             </div>

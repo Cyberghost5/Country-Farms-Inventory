@@ -42,6 +42,11 @@ class DispatchDistributionTest extends TestCase
             'state' => 'Lagos',
         ]);
 
+        $this->distributor->operatingAreas()->create([
+            'state' => 'Lagos',
+            'lga' => 'Ikeja',
+        ]);
+
         $this->superAdmin = User::factory()->create([
             'role' => User::ROLE_SUPER_ADMIN,
             'is_active' => true,
@@ -112,6 +117,20 @@ class DispatchDistributionTest extends TestCase
         ]);
         // 810 - 10 = 800.00
         $this->assertEquals(800.00, $this->yoghurt->calculatedPriceForDistributor($this->distributor->id));
+
+        // 5. Test another operating area (Abuja) to verify multi-state resolution
+        $this->distributor->operatingAreas()->create([
+            'state' => 'Abuja',
+            'lga' => 'Garki',
+        ]);
+        StatePricing::create([
+            'state' => 'Abuja',
+            'product_id' => $this->yoghurt->id,
+            'price' => 1200.00,
+        ]);
+        // Lagos resolves to 800.00, Abuja resolves to 1200.00
+        $this->assertEquals(800.00, $this->yoghurt->calculatedPriceForDistributor($this->distributor->id, 'Lagos'));
+        $this->assertEquals(1200.00, $this->yoghurt->calculatedPriceForDistributor($this->distributor->id, 'Abuja'));
     }
 
     /** @test */
@@ -122,6 +141,7 @@ class DispatchDistributionTest extends TestCase
         $response = $this->actingAs($this->storeManager)
             ->post(route('store.dispatches.store'), [
                 'distributor_id' => $this->distributor->id,
+                'state' => 'Lagos',
                 'items' => [
                     [
                         'product_id' => $this->yoghurt->id,
@@ -136,6 +156,7 @@ class DispatchDistributionTest extends TestCase
         // Assert dispatch was created
         $this->assertDatabaseHas('dispatches', [
             'distributor_id' => $this->distributor->id,
+            'state' => 'Lagos',
             'total_amount' => 100000.00, // 100 * 1000.00 base price
             'dispatched_by' => $this->storeManager->id,
         ]);
@@ -168,6 +189,7 @@ class DispatchDistributionTest extends TestCase
         $response = $this->actingAs($this->storeManager)
             ->post(route('store.dispatches.store'), [
                 'distributor_id' => $this->distributor->id,
+                'state' => 'Lagos',
                 'items' => [
                     [
                         'product_id' => $this->yoghurt->id,
@@ -191,6 +213,7 @@ class DispatchDistributionTest extends TestCase
         $response = $this->actingAs($this->storeManager)
             ->post(route('store.dispatches.store'), [
                 'distributor_id' => $this->distributor->id,
+                'state' => 'Lagos',
                 'items' => [
                     [
                         'product_id' => $this->yoghurt->id,
@@ -223,6 +246,7 @@ class DispatchDistributionTest extends TestCase
         $this->actingAs($this->storeManager)
             ->post(route('store.dispatches.store'), [
                 'distributor_id' => $this->distributor->id,
+                'state' => 'Lagos',
                 'items' => [
                     [
                         'product_id' => $this->yoghurt->id,

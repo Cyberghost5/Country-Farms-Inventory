@@ -77,19 +77,25 @@
 
           <div class="card" style="padding:24px; margin-bottom:20px;">
             <h3 style="color:#1d086c; margin-bottom:16px;">Dispatch Details</h3>
-            <div class="form-row-2">
+            <div class="form-row-3" style="display:grid; grid-template-columns: 1fr 1fr 1.5fr; gap:16px;">
               <div class="form-group">
-                <label for="distributor_id">Select Distributor *</label>
-                <select class="form-input" id="distributor_id" name="distributor_id" required>
-                  <option value="">-- Select Distributor --</option>
-                  @foreach ($distributors as $d)
-                    <option value="{{ $d->id }}">{{ $d->company_name ?: $d->name }} ({{ $d->name }})</option>
+                <label for="state_select">Select State *</label>
+                <select class="form-input" id="state_select" name="state" required>
+                  <option value="">-- Select State --</option>
+                  @foreach ($operatingStates as $s)
+                    <option value="{{ $s }}">{{ $s }}</option>
                   @endforeach
                 </select>
               </div>
               <div class="form-group">
+                <label for="distributor_id">Select Distributor *</label>
+                <select class="form-input" id="distributor_id" name="distributor_id" required disabled>
+                  <option value="">-- Choose State First --</option>
+                </select>
+              </div>
+              <div class="form-group">
                 <label for="remarks">Remarks</label>
-                <input class="form-input" type="text" id="remarks" name="remarks" placeholder="Optional notes about transport, vehicle, driver, etc." />
+                <input class="form-input" type="text" id="remarks" name="remarks" placeholder="Optional notes (vehicle, driver, etc.)" />
               </div>
             </div>
           </div>
@@ -126,11 +132,40 @@
     <script>
       const pricingMap = @json($pricingMap);
       const products = @json($products);
+      const distributors = @json($distributors);
       let rowIndex = 0;
 
       document.addEventListener('DOMContentLoaded', () => {
         // Add initial row
         addNewRow();
+
+        // State select change handler
+        document.getElementById('state_select').addEventListener('change', function() {
+          const state = this.value;
+          const distSelect = document.getElementById('distributor_id');
+
+          if (!state) {
+            distSelect.innerHTML = '<option value="">-- Choose State First --</option>';
+            distSelect.setAttribute('disabled', 'true');
+          } else {
+            // Filter distributors operating in selected state
+            const filtered = distributors.filter(d => 
+              d.operating_areas && d.operating_areas.some(oa => oa.state === state)
+            );
+
+            distSelect.innerHTML = '<option value="">-- Select Distributor --</option>';
+            filtered.forEach(d => {
+              const opt = document.createElement('option');
+              opt.value = d.id;
+              opt.textContent = (d.company_name ? `${d.company_name} (${d.name})` : d.name);
+              distSelect.appendChild(opt);
+            });
+            distSelect.removeAttribute('disabled');
+          }
+
+          updateAllPrices();
+          updateTotal();
+        });
 
         // Register handlers
         document.getElementById('distributor_id').addEventListener('change', () => {
@@ -224,7 +259,7 @@
         const stockErr = row.querySelector('.stock-error');
 
         const prodId = select.value;
-        const distId = document.getElementById('distributor_id').value;
+        const stateId = document.getElementById('state_select').value;
 
         if (!prodId) {
           qtyInput.disabled = true;
@@ -246,8 +281,8 @@
         stockQty.textContent = numberFormat(stock);
         stockInd.style.visibility = 'visible';
 
-        if (distId && pricingMap[distId] && pricingMap[distId][prodId] !== undefined) {
-          const price = pricingMap[distId][prodId];
+        if (stateId && pricingMap[stateId] && pricingMap[stateId][prodId] !== undefined) {
+          const price = pricingMap[stateId][prodId];
           priceInput.value = numberFormat(price, 2);
           subtotalInput.value = numberFormat(price * qtyInput.value, 2);
         } else {
@@ -268,13 +303,13 @@
         const priceInput = row.querySelector('.price-input');
         const subtotalInput = row.querySelector('.subtotal-input');
 
-        const distId = document.getElementById('distributor_id').value;
+        const stateId = document.getElementById('state_select').value;
         const prodId = select.value;
         const qty = parseInt(qtyInput.value) || 0;
 
         let price = 0;
-        if (prodId && distId && pricingMap[distId] && pricingMap[distId][prodId] !== undefined) {
-          price = pricingMap[distId][prodId];
+        if (prodId && stateId && pricingMap[stateId] && pricingMap[stateId][prodId] !== undefined) {
+          price = pricingMap[stateId][prodId];
         } else if (prodId) {
           const prodObj = products.find(p => p.id == prodId);
           price = prodObj ? prodObj.base_price : 0;
@@ -287,7 +322,7 @@
       }
 
       function updateAllPrices() {
-        const distId = document.getElementById('distributor_id').value;
+        const stateId = document.getElementById('state_select').value;
         const rows = document.querySelectorAll('.dispatch-row');
 
         rows.forEach(row => {
@@ -301,10 +336,13 @@
 
           const qty = parseInt(qtyInput.value) || 0;
 
-          if (distId && pricingMap[distId] && pricingMap[distId][prodId] !== undefined) {
-            const price = pricingMap[distId][prodId];
+          if (stateId && pricingMap[stateId] && pricingMap[stateId][prodId] !== undefined) {
+            const price = pricingMap[stateId][prodId];
             priceInput.value = numberFormat(price, 2);
             subtotalInput.value = numberFormat(price * qty, 2);
+          } else {
+            priceInput.value = '-';
+            subtotalInput.value = '-';
           }
         });
       }
@@ -349,7 +387,7 @@
       }
 
       function updateTotal() {
-        const distId = document.getElementById('distributor_id').value;
+        const stateId = document.getElementById('state_select').value;
         const rows = document.querySelectorAll('.dispatch-row');
         let total = 0;
 
@@ -363,8 +401,8 @@
           const qty = parseInt(qtyInput.value) || 0;
           let price = 0;
 
-          if (distId && pricingMap[distId] && pricingMap[distId][prodId] !== undefined) {
-            price = pricingMap[distId][prodId];
+          if (stateId && pricingMap[stateId] && pricingMap[stateId][prodId] !== undefined) {
+            price = pricingMap[stateId][prodId];
           } else {
             const prodObj = products.find(p => p.id == prodId);
             price = prodObj ? prodObj.base_price : 0;

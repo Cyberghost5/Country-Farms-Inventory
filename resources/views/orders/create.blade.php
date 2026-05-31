@@ -68,10 +68,21 @@
           @csrf
 
           <div class="card" style="padding:24px; margin-bottom:20px;">
-            <h3 style="color:#1d086c; margin-bottom:16px;">Order Remarks</h3>
-            <div class="form-group">
-              <label for="remarks">Special Instructions / Remarks</label>
-              <textarea class="form-input" id="remarks" name="remarks" rows="2" placeholder="Optional notes for delivery schedule, packaging choices, etc."></textarea>
+            <h3 style="color:#1d086c; margin-bottom:16px;">Order Details</h3>
+            <div class="form-row-2">
+              <div class="form-group">
+                <label for="state">Select Destination State *</label>
+                <select class="form-input" id="state" name="state" required>
+                  <option value="">-- Choose Destination State --</option>
+                  @foreach ($operatingAreas->unique('state') as $area)
+                    <option value="{{ $area->state }}">{{ $area->state }}</option>
+                  @endforeach
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="remarks">Special Instructions / Remarks</label>
+                <input class="form-input" type="text" id="remarks" name="remarks" placeholder="Optional notes for delivery schedule, packaging choices, etc." />
+              </div>
             </div>
           </div>
 
@@ -111,6 +122,12 @@
       document.addEventListener('DOMContentLoaded', () => {
         // Add initial row
         addNewRow();
+
+        // Register state change handler to update prices dynamically
+        document.getElementById('state').addEventListener('change', () => {
+          updateAllPrices();
+          updateTotal();
+        });
 
         document.getElementById('addRowBtn').addEventListener('click', addNewRow);
       });
@@ -189,6 +206,7 @@
         const subtotalInput = row.querySelector('.subtotal-input');
 
         const prodId = select.value;
+        const stateVal = document.getElementById('state').value;
 
         if (!prodId) {
           qtyInput.disabled = true;
@@ -209,7 +227,9 @@
         stockQty.textContent = numberFormat(stock);
         stockInd.style.visibility = 'visible';
 
-        const price = pricingMap[prodId] !== undefined ? pricingMap[prodId] : 0;
+        const price = (stateVal && pricingMap[stateVal] && pricingMap[stateVal][prodId] !== undefined)
+          ? pricingMap[stateVal][prodId]
+          : 0;
         priceInput.value = numberFormat(price, 2);
         subtotalInput.value = numberFormat(price * qtyInput.value, 2);
 
@@ -223,14 +243,44 @@
 
         const prodId = select.value;
         const qty = parseInt(qtyInput.value) || 0;
+        const stateVal = document.getElementById('state').value;
 
-        const price = prodId && pricingMap[prodId] !== undefined ? pricingMap[prodId] : 0;
+        const price = (prodId && stateVal && pricingMap[stateVal] && pricingMap[stateVal][prodId] !== undefined)
+          ? pricingMap[stateVal][prodId]
+          : 0;
         subtotalInput.value = numberFormat(price * qty, 2);
 
         updateTotal();
       }
 
+      function updateAllPrices() {
+        const stateVal = document.getElementById('state').value;
+        const rows = document.querySelectorAll('.order-row');
+
+        rows.forEach(row => {
+          const select = row.querySelector('.product-select');
+          const qtyInput = row.querySelector('.qty-input');
+          const priceInput = row.querySelector('.price-input');
+          const subtotalInput = row.querySelector('.subtotal-input');
+
+          const prodId = select.value;
+          if (!prodId) return;
+
+          const qty = parseInt(qtyInput.value) || 0;
+
+          if (stateVal && pricingMap[stateVal] && pricingMap[stateVal][prodId] !== undefined) {
+            const price = pricingMap[stateVal][prodId];
+            priceInput.value = numberFormat(price, 2);
+            subtotalInput.value = numberFormat(price * qty, 2);
+          } else {
+            priceInput.value = '-';
+            subtotalInput.value = '-';
+          }
+        });
+      }
+
       function updateTotal() {
+        const stateVal = document.getElementById('state').value;
         const rows = document.querySelectorAll('.order-row');
         let total = 0;
 
@@ -242,7 +292,9 @@
           if (!prodId) return;
 
           const qty = parseInt(qtyInput.value) || 0;
-          const price = pricingMap[prodId] !== undefined ? pricingMap[prodId] : 0;
+          const price = (stateVal && pricingMap[stateVal] && pricingMap[stateVal][prodId] !== undefined)
+            ? pricingMap[stateVal][prodId]
+            : 0;
 
           total += price * qty;
         });

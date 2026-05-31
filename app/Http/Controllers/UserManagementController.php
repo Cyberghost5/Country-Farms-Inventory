@@ -63,18 +63,45 @@ class UserManagementController extends Controller
             'phone'        => ['required', 'string', Rule::unique('users', 'phone')],
             'role'         => ['required', Rule::in(['general_manager', 'production_manager', 'store_manager', 'distributor'])],
             'company_name' => ['nullable', 'string', 'max:150'],
-            'state'        => ['nullable', 'string', 'max:60'],
-            'lga'          => ['nullable', 'string', 'max:60'],
             'address'      => ['nullable', 'string'],
             'password'     => ['required', 'string', 'min:8', 'confirmed'],
+            'state'        => ['nullable', 'string', 'max:60'],
+            'lga'          => ['nullable', 'string', 'max:60'],
+            'operating_areas' => ['nullable', 'array'],
+            'operating_areas.*.state' => ['required_with:operating_areas', 'string', 'max:60'],
+            'operating_areas.*.lga'   => ['nullable', 'string', 'max:60'],
         ]);
 
-        // $data['phone']    = $this->normalisePhone($data['phone']);
         $data['phone']    = $data['phone'];
         $data['password'] = Hash::make($data['password']);
         $data['is_active']= true;
 
         $newUser = User::create($data);
+
+        if ($newUser->isDistributor()) {
+            if ($request->has('operating_areas')) {
+                foreach ($request->input('operating_areas', []) as $area) {
+                    if (!empty($area['state'])) {
+                        $newUser->operatingAreas()->create([
+                            'state' => $area['state'],
+                            'lga'   => $area['lga'] ?? null,
+                        ]);
+                    }
+                }
+            } elseif ($request->filled('state')) {
+                $newUser->operatingAreas()->create([
+                    'state' => $request->input('state'),
+                    'lga'   => $request->input('lga') ?? null,
+                ]);
+            }
+            
+            // Sync primary area to legacy fields
+            $firstArea = $newUser->operatingAreas()->first();
+            $newUser->update([
+                'state' => $firstArea?->state ?? null,
+                'lga'   => $firstArea?->lga ?? null,
+            ]);
+        }
 
         return redirect()->route('admin.users.index')
             ->with('success', "{$newUser->role_label} '{$newUser->name}' created successfully.");
@@ -99,14 +126,17 @@ class UserManagementController extends Controller
             'email'        => ['nullable', 'email', Rule::unique('users', 'email')->ignore($user->id)],
             'phone'        => ['required', 'string', Rule::unique('users', 'phone')->ignore($user->id)],
             'company_name' => ['nullable', 'string', 'max:150'],
-            'state'        => ['nullable', 'string', 'max:60'],
-            'lga'          => ['nullable', 'string', 'max:60'],
             'address'      => ['nullable', 'string'],
             'is_active'    => ['nullable', 'boolean'],
             'password'     => ['nullable', 'string', 'min:8', 'confirmed'],
+            'state'        => ['nullable', 'string', 'max:60'],
+            'lga'          => ['nullable', 'string', 'max:60'],
+            'operating_areas' => ['nullable', 'array'],
+            'operating_areas.*.state' => ['required_with:operating_areas', 'string', 'max:60'],
+            'operating_areas.*.lga'   => ['nullable', 'string', 'max:60'],
         ]);
 
-        $data['phone']     = $this->normalisePhone($data['phone']);
+        $data['phone']     = $data['phone'];
         $data['is_active'] = $request->boolean('is_active', true);
 
         if (!empty($data['password'])) {
@@ -116,6 +146,32 @@ class UserManagementController extends Controller
         }
 
         $user->update($data);
+
+        if ($user->isDistributor()) {
+            if ($request->has('operating_areas')) {
+                $user->operatingAreas()->delete();
+                foreach ($request->input('operating_areas', []) as $area) {
+                    if (!empty($area['state'])) {
+                        $user->operatingAreas()->create([
+                            'state' => $area['state'],
+                            'lga'   => $area['lga'] ?? null,
+                        ]);
+                    }
+                }
+            } elseif ($request->filled('state')) {
+                $user->operatingAreas()->delete();
+                $user->operatingAreas()->create([
+                    'state' => $request->input('state'),
+                    'lga'   => $request->input('lga') ?? null,
+                ]);
+            }
+            // Sync primary area to legacy fields
+            $firstArea = $user->operatingAreas()->first();
+            $user->update([
+                'state' => $firstArea?->state ?? null,
+                'lga'   => $firstArea?->lga ?? null,
+            ]);
+        }
 
         return redirect()->route('admin.users.index')
             ->with('success', "'{$user->name}' updated successfully.");

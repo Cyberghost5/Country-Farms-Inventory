@@ -47,11 +47,23 @@ class OrderFeatureTest extends TestCase
         $this->distributor1 = User::factory()->create([
             'role' => User::ROLE_DISTRIBUTOR,
             'is_active' => true,
+            'state' => 'Lagos',
+        ]);
+
+        $this->distributor1->operatingAreas()->create([
+            'state' => 'Lagos',
+            'lga' => 'Ikeja',
         ]);
 
         $this->distributor2 = User::factory()->create([
             'role' => User::ROLE_DISTRIBUTOR,
             'is_active' => true,
+            'state' => 'Abuja',
+        ]);
+
+        $this->distributor2->operatingAreas()->create([
+            'state' => 'Abuja',
+            'lga' => 'Garki',
         ]);
 
         $this->product = Product::create([
@@ -71,6 +83,7 @@ class OrderFeatureTest extends TestCase
     public function test_distributor_can_place_an_order()
     {
         $orderData = [
+            'state' => 'Lagos',
             'remarks' => 'Deliver by Saturday morning please',
             'items' => [
                 [
@@ -89,6 +102,7 @@ class OrderFeatureTest extends TestCase
 
         $this->assertDatabaseHas('orders', [
             'distributor_id' => $this->distributor1->id,
+            'state' => 'Lagos',
             'status' => 'pending',
             'total_amount' => 5000.00, // 500.00 * 10
             'remarks' => 'Deliver by Saturday morning please',
@@ -108,6 +122,7 @@ class OrderFeatureTest extends TestCase
         // Order for distributor 1
         $order1 = Order::create([
             'distributor_id' => $this->distributor1->id,
+            'state' => 'Lagos',
             'order_number' => 'ORD-20260530-0001',
             'status' => 'pending',
             'total_amount' => 1000.00,
@@ -116,6 +131,7 @@ class OrderFeatureTest extends TestCase
         // Order for distributor 2
         $order2 = Order::create([
             'distributor_id' => $this->distributor2->id,
+            'state' => 'Abuja',
             'order_number' => 'ORD-20260530-0002',
             'status' => 'pending',
             'total_amount' => 2000.00,
@@ -137,6 +153,7 @@ class OrderFeatureTest extends TestCase
     {
         $order = Order::create([
             'distributor_id' => $this->distributor1->id,
+            'state' => 'Lagos',
             'order_number' => 'ORD-20260530-0001',
             'status' => 'pending',
             'total_amount' => 1000.00,
@@ -163,6 +180,7 @@ class OrderFeatureTest extends TestCase
     {
         $order = Order::create([
             'distributor_id' => $this->distributor1->id,
+            'state' => 'Lagos',
             'order_number' => 'ORD-20260530-0001',
             'status' => 'pending',
             'total_amount' => 1000.00,
@@ -204,6 +222,7 @@ class OrderFeatureTest extends TestCase
     {
         $order = Order::create([
             'distributor_id' => $this->distributor1->id,
+            'state' => 'Lagos',
             'order_number' => 'ORD-20260530-0001',
             'status' => 'pending',
             'total_amount' => 1000.00,

@@ -52,7 +52,7 @@
               </div>
               <div class="form-group">
                 <label>Role *</label>
-                <select class="form-input" name="role" required>
+                <select class="form-input" name="role" id="roleSelect" required>
                   <option value="general_manager"    {{ old('role', $forRole) === 'general_manager'    ? 'selected' : '' }}>General Manager</option>
                   <option value="production_manager" {{ old('role', $forRole) === 'production_manager' ? 'selected' : '' }}>Production Manager</option>
                   <option value="store_manager"      {{ old('role', $forRole) === 'store_manager'      ? 'selected' : '' }}>Store Manager</option>
@@ -81,23 +81,20 @@
                        placeholder="For distributors" />
               </div>
               <div class="form-group">
-                <label>State</label>
-                <select class="form-input" name="state" id="stateSelect">
-                  <option value="">-- Select State --</option>
-                </select>
+                {{-- Spacer --}}
               </div>
             </div>
 
-            <div class="form-row-2">
-              <div class="form-group">
-                <label>LGA (Local Government Area)</label>
-                <select class="form-input" name="lga" id="lgaSelect">
-                  <option value="">-- Select LGA --</option>
-                </select>
+            <div id="operatingAreasSection" style="display:none; margin-bottom: 20px;">
+              <label style="font-weight:600; color:#1d086c; display:block; margin-bottom:12px; font-size:0.95rem;">
+                <i class="bi bi-geo-alt"></i> Operating Areas *
+              </label>
+              <div id="operatingAreasContainer">
+                <!-- dynamic rows appended via JS -->
               </div>
-              <div class="form-group">
-                {{-- Spacer --}}
-              </div>
+              <button type="button" class="ghost-btn btn-sm" id="addAreaRowBtn" style="margin-top:8px;">
+                <i class="bi bi-plus-lg"></i> Add Operating Area
+              </button>
             </div>
 
             <div class="form-group">
@@ -147,30 +144,81 @@
       }
 
       document.addEventListener('DOMContentLoaded', function () {
-        const stateSelect = document.getElementById('stateSelect');
-        const lgaSelect = document.getElementById('lgaSelect');
-        const oldState = "{{ old('state') }}";
-        const oldLga = "{{ old('lga') }}";
+        const roleSelect = document.getElementById('roleSelect');
+        const operatingAreasSection = document.getElementById('operatingAreasSection');
+        const operatingAreasContainer = document.getElementById('operatingAreasContainer');
+        const addAreaRowBtn = document.getElementById('addAreaRowBtn');
+        let areaRowIndex = 0;
 
-        if (window.statesAndLgas) {
+        function toggleOperatingAreas() {
+          if (roleSelect.value === 'distributor') {
+            operatingAreasSection.style.display = 'block';
+            // Make sure there is at least one row
+            if (operatingAreasContainer.children.length === 0) {
+              addAreaRow();
+            }
+            // Enforce required on state selects
+            operatingAreasContainer.querySelectorAll('.state-select').forEach(sel => {
+              sel.setAttribute('required', 'true');
+            });
+          } else {
+            operatingAreasSection.style.display = 'none';
+            operatingAreasContainer.querySelectorAll('.state-select').forEach(sel => {
+              sel.removeAttribute('required');
+            });
+          }
+        }
+
+        function addAreaRow(stateVal = '', lgaVal = '') {
+          const idx = areaRowIndex++;
+          const row = document.createElement('div');
+          row.className = 'form-row-2 area-row';
+          row.style.marginBottom = '12px';
+          row.style.alignItems = 'end';
+          row.id = `area-row-${idx}`;
+
+          row.innerHTML = `
+            <div class="form-group" style="margin-bottom:0;">
+              <label>State *</label>
+              <select class="form-input state-select" name="operating_areas[${idx}][state]" required>
+                <option value="">-- Select State --</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0; display:flex; gap:10px; align-items:end;">
+              <div style="flex:1;">
+                <label>LGA (Local Government Area)</label>
+                <select class="form-input lga-select" name="operating_areas[${idx}][lga]">
+                  <option value="">-- Select LGA --</option>
+                </select>
+              </div>
+              <button type="button" class="danger-ghost btn-sm" onclick="removeAreaRow(${idx})" style="height:42px;"><i class="bi bi-trash"></i></button>
+            </div>
+          `;
+
+          operatingAreasContainer.appendChild(row);
+
+          const stateSel = row.querySelector('.state-select');
+          const lgaSel = row.querySelector('.lga-select');
+
           // Populate states
-          for (const state in window.statesAndLgas) {
-            if (window.statesAndLgas.hasOwnProperty(state)) {
-              if (state === 'FCT') continue; // Skip redundant alias key in list
-              const opt = document.createElement('option');
-              opt.value = state;
-              opt.textContent = state;
-              if (state === oldState) {
-                opt.selected = true;
+          if (window.statesAndLgas) {
+            for (const state in window.statesAndLgas) {
+              if (window.statesAndLgas.hasOwnProperty(state)) {
+                if (state === 'FCT') continue;
+                const opt = document.createElement('option');
+                opt.value = state;
+                opt.textContent = state;
+                if (state === stateVal) {
+                  opt.selected = true;
+                }
+                stateSel.appendChild(opt);
               }
-              stateSelect.appendChild(opt);
             }
           }
 
           function populateLgas(selectedState, selectedLga = '') {
-            lgaSelect.innerHTML = '<option value="">-- Select LGA --</option>';
+            lgaSel.innerHTML = '<option value="">-- Select LGA --</option>';
             if (!selectedState || !window.statesAndLgas[selectedState]) return;
-
             window.statesAndLgas[selectedState].forEach(function (lga) {
               const opt = document.createElement('option');
               opt.value = lga;
@@ -178,18 +226,29 @@
               if (lga === selectedLga) {
                 opt.selected = true;
               }
-              lgaSelect.appendChild(opt);
+              lgaSel.appendChild(opt);
             });
           }
 
-          stateSelect.addEventListener('change', function () {
+          stateSel.addEventListener('change', function () {
             populateLgas(this.value);
           });
 
-          if (oldState) {
-            populateLgas(oldState, oldLga);
+          if (stateVal) {
+            populateLgas(stateVal, lgaVal);
           }
         }
+
+        window.removeAreaRow = function (idx) {
+          const row = document.getElementById(`area-row-${idx}`);
+          row?.remove();
+        };
+
+        roleSelect.addEventListener('change', toggleOperatingAreas);
+        addAreaRowBtn.addEventListener('click', () => addAreaRow());
+
+        // Initial setup
+        toggleOperatingAreas();
       });
     </script>
     <script src="{{ asset('assets/js/dashboard.js') }}"></script>
