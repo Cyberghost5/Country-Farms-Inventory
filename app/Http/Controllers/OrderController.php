@@ -182,7 +182,7 @@ class OrderController extends Controller
         );
 
         if ($user->isDistributor()) {
-            abort_unless($order->distributor_id === $user->id, 404);
+            abort_unless((int) $order->distributor_id === (int) $user->id, 404);
         }
 
         // Load relationships if they aren't loaded yet
