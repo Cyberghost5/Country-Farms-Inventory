@@ -84,7 +84,11 @@
               <tbody>
                 @forelse ($invoices as $inv)
                   <tr>
-                    <td><strong style="color:#1d086c;">{{ $inv->invoice_number }}</strong></td>
+                    <td>
+                      <a href="{{ route('invoices.show', $inv->id) }}" style="text-decoration:none; color:#1d086c; font-weight:600;">
+                        <i class="bi bi-link-45deg"></i> {{ $inv->invoice_number }}
+                      </a>
+                    </td>
                     <td><code>{{ $inv->dispatch ? $inv->dispatch->dispatch_number : '-' }}</code></td>
                     <td>{{ $inv->created_at->format('d M Y') }}</td>
                     <td>

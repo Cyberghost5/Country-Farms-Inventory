@@ -101,4 +101,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/orders/{order}', [\App\Http\Controllers\OrderController::class, 'show'])->name('orders.show');
     Route::post('/orders/{order}/approve', [\App\Http\Controllers\OrderController::class, 'approve'])->name('orders.approve');
     Route::post('/orders/{order}/reject', [\App\Http\Controllers\OrderController::class, 'reject'])->name('orders.reject');
+
+    /* ── Invoice Detail route ── */
+    Route::get('/invoices/{invoice}', [\App\Http\Controllers\OversightDispatchController::class, 'showInvoice'])->name('invoices.show');
 });

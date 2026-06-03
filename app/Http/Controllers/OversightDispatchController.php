@@ -20,7 +20,7 @@ class OversightDispatchController extends Controller
         $search        = $request->input('search', '');
         $distributorId = $request->input('distributor_id', '');
 
-        $dispatches = Dispatch::with(['distributor', 'dispatcher', 'items.product'])
+        $dispatches = Dispatch::with(['distributor', 'dispatcher', 'items.product', 'invoice'])
             ->when($search, fn($q) => $q->where('dispatch_number', 'like', "%{$search}%"))
             ->when($distributorId, fn($q) => $q->where('distributor_id', $distributorId))
             ->orderBy('dispatched_at', 'desc')
@@ -59,7 +59,7 @@ class OversightDispatchController extends Controller
         abort_unless($user->isOversight(), 403);
 
         $distributors = User::where('role', User::ROLE_DISTRIBUTOR)
-            ->with(['invoices', 'payments'])
+            ->with(['invoices.dispatch.items.product', 'payments'])
             ->orderBy('name')
             ->paginate(25);
 
@@ -210,5 +210,21 @@ class OversightDispatchController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
+    }
+
+    public function showInvoice(Invoice $invoice)
+    {
+        $user = Auth::user();
+
+        // Authorization check
+        if ($user->isDistributor()) {
+            abort_unless((int)$invoice->distributor_id === (int)$user->id, 403);
+        } else {
+            abort_unless($user->isOversight(), 403);
+        }
+
+        $invoice->load(['distributor', 'dispatch.items.product', 'payments.recorder']);
+
+        return view('admin.invoices.show', compact('user', 'invoice'));
     }
 }

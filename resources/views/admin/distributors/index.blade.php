@@ -80,7 +80,7 @@
                       <tr>
                         <td><strong style="color:#1d086c;">{{ $p->payment_number }}</strong></td>
                         <td>{{ $p->distributor->company_name ?: $p->distributor->name }}</td>
-                        <td><code>{{ $p->invoice->invoice_number }}</code></td>
+                        <td><code><a href="{{ route('invoices.show', $p->invoice->id) }}" style="text-decoration:none; color:#1d086c; font-weight:600;"><i class="bi bi-link-45deg"></i> {{ $p->invoice->invoice_number }}</a></code></td>
                         <td><strong style="color:#2e7d32;">₦{{ number_format($p->amount, 2) }}</strong></td>
                         <td>{{ $p->payment_date->format('d M Y') }}</td>
                         <td><span class="cat-pill cat-others">{{ ucfirst(str_replace('_', ' ', $p->payment_method)) }}</span></td>
@@ -172,11 +172,25 @@
                         <div style="margin-top:6px; background:#f8f9fa; padding:8px; border-radius:6px; border:1px solid #eee; color:#333; line-height:1.4;">
                           <div style="font-weight:600; border-bottom:1px solid #ddd; padding-bottom:4px; margin-bottom:6px;">Invoices List:</div>
                           @forelse ($d->invoices as $inv)
-                            <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:0.8rem;">
-                              <span>{{ $inv->invoice_number }} (Due: {{ $inv->due_date->format('d M Y') }})</span>
-                              <span style="font-weight:600;" class="{{ $inv->status === 'paid' ? 'badge-active' : ($inv->status === 'partially_paid' ? 'badge-inactive' : 'stock-badge-low') }}">
-                                {{ number_format($inv->due_amount, 2) }} due
-                              </span>
+                            <div style="margin-bottom:8px; padding-bottom:6px; border-bottom:1px dashed #eee; font-size:0.8rem;">
+                              <div style="display:flex; justify-content:space-between; align-items: center;">
+                                <span>
+                                  <a href="{{ route('invoices.show', $inv->id) }}" style="color:#1d086c; font-weight:600; text-decoration:none;">
+                                    <i class="bi bi-link-45deg"></i> {{ $inv->invoice_number }}
+                                  </a>
+                                  <span style="color:#666; font-size:0.75rem; margin-left:4px;">(Due: {{ $inv->due_date->format('d M Y') }})</span>
+                                </span>
+                                <span style="font-weight:600;" class="{{ $inv->status === 'paid' ? 'badge-active' : ($inv->status === 'partially_paid' ? 'badge-inactive' : 'stock-badge-low') }}">
+                                  ₦{{ number_format($inv->due_amount, 2) }} due
+                                </span>
+                              </div>
+                              @if($inv->dispatch && $inv->dispatch->items->isNotEmpty())
+                                <div style="margin-top:4px; padding-left:10px; color:#555; font-size:0.75rem; line-height:1.4;">
+                                  @foreach($inv->dispatch->items as $item)
+                                    <div>&bull; {{ $item->product->name }} (Qty: {{ $item->quantity }})</div>
+                                  @endforeach
+                                </div>
+                              @endif
                             </div>
                           @empty
                             <div style="color:#999; font-size:0.8rem;">No invoices logged.</div>

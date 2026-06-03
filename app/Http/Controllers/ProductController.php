@@ -122,7 +122,7 @@ class ProductController extends Controller
         $user = Auth::user();
         abort_unless($user->isSuperAdmin(), 403);
 
-        $selectedState = $request->input('state', 'Lagos');
+        $selectedState = $request->input('state', 'Bauchi');
 
         $products  = Product::where('is_active', true)->orderBy('category')->orderBy('name')->get();
         $pricing   = StatePricing::where('state', $selectedState)->pluck('price', 'product_id');

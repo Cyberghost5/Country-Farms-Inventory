@@ -90,7 +90,13 @@
                         <small style="color:#666; display:block;">{{ $p->distributor->company_name }}</small>
                       @endif
                     </td>
-                    <td><code>{{ $p->invoice->invoice_number }}</code></td>
+                    <td>
+                      <code>
+                        <a href="{{ route('invoices.show', $p->invoice->id) }}" style="text-decoration:none; color:#1d086c; font-weight:600;">
+                          <i class="bi bi-link-45deg"></i> {{ $p->invoice->invoice_number }}
+                        </a>
+                      </code>
+                    </td>
                     <td><strong style="color:#2e7d32;">₦{{ number_format($p->amount, 2) }}</strong></td>
                     <td>{{ $p->payment_date->format('d M Y') }}</td>
                     <td><span class="cat-pill cat-others">{{ ucfirst(str_replace('_', ' ', $p->payment_method)) }}</span></td>

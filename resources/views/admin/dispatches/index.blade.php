@@ -60,7 +60,7 @@
                   <th>Date &amp; Time</th>
                   <th>Items Dispatched</th>
                   <th>Total Value (₦)</th>
-                  <th>Status</th>
+                  <th>Payment Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -88,10 +88,18 @@
                     </td>
                     <td><strong style="color:#2e7d32;">{{ number_format($d->total_amount, 2) }}</strong></td>
                     <td>
-                      @if ($d->status === 'received')
-                        <span class="status-badge badge-active"><i class="bi bi-check-circle-fill"></i> Received</span>
+                      @if ($d->invoice)
+                        @if ($d->invoice->status === 'paid')
+                          <span class="status-badge badge-active"><i class="bi bi-check-circle-fill"></i> Paid</span>
+                        @elseif ($d->invoice->status === 'partially_paid')
+                          <span class="status-badge badge-inactive" style="background:#e3f2fd; color:#1565c0; border:1px solid #bbdefb;"><i class="bi bi-pie-chart-fill"></i> Partially Paid</span>
+                        @elseif ($d->invoice->status === 'pending_approval')
+                          <span class="status-badge status-pending" style="background:#fff8e1; color:#b45309; border:1px solid #ffe082;"><i class="bi bi-hourglass-split"></i> Pending Approval</span>
+                        @else
+                          <span class="status-badge badge-deleted" style="background:#fdecea; color:#b71c1c; border:1px solid #ffcdd2;"><i class="bi bi-exclamation-circle-fill"></i> Unpaid</span>
+                        @endif
                       @else
-                        <span class="status-badge badge-deleted" style="background:#e3f2fd; color:#1565c0; border:1px solid #bbdefb;"><i class="bi bi-truck"></i> Sent</span>
+                        <span class="status-badge badge-inactive" style="background:#f5f5f5; color:#666; border:1px solid #ddd;"><i class="bi bi-file-earmark-x"></i> No Invoice</span>
                       @endif
                     </td>
                   </tr>
